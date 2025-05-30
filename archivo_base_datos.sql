@@ -6,7 +6,8 @@ use gestion_videojuegos;
 
 create table videojuegos(
 id_juego int primary key auto_increment,
-nombre_videojuego varchar(100)
+nombre_videojuego varchar(100) not null,
+imagen_videojuego varchar(225)
 );
 
 #Tabla de fases del torneo#
@@ -33,48 +34,16 @@ fecha_inicio DATE NOT NULL,
 fecha_finalizacion DATE NOT NULL,
 id_fase INT,
 tipo_participante ENUM('equipo', 'jugador') NOT NULL,
+id_videojuego INT NOT NULL,
 CONSTRAINT fk_fase FOREIGN KEY (id_fase) REFERENCES fases_torneo(id_fase)
+ON DELETE CASCADE
+ON UPDATE CASCADE,
+CONSTRAINT fk_videojuego FOREIGN KEY (id_videojuego) REFERENCES videojuegos(id_videojuego)
 ON DELETE CASCADE
 ON UPDATE CASCADE,
 CONSTRAINT CH_validar_fecha_inicio CHECK (fecha_inicio < fecha_finalizacion)
 );
 
-
-
-#Tabla de niveles de equipos#
-create table niveles_equipos (
-id_nivel_equipo int primary key auto_increment,
-nivel_equipo varchar(50) not null
-);
-
-#Tabla de niveles de equipos#
-create table niveles_jugador (
-id_nivel_jugador int primary key auto_increment,
-nivel_jugador varchar(50) not null
-);
-
-#Tabla de equipos#
-create table equipos (
-id_equipo int primary key auto_increment,
-nombre_equipo varchar(50) not null,
-fecha_creacion DATE NOT NULL
-);
-
-
-#Tabla de jugadores#
-CREATE TABLE jugadores (
-id_jugador INT PRIMARY KEY AUTO_INCREMENT,
-usuario VARCHAR(100) NOT NULL,
-id_equipo INT,
-CONSTRAINT u_equipo FOREIGN KEY (id_equipo) REFERENCES equipos(id_equipo)
-ON DELETE CASCADE
-ON UPDATE CASCADE,
-CONSTRAINT u_usuario UNIQUE(usuario)
-);
-
-
-
-#Tabla que relaciona torneos, jugadores y equipos#
 CREATE TABLE torneo_participantes (
   id_torneo_participante INT PRIMARY KEY AUTO_INCREMENT,
   id_torneo INT NOT NULL,
@@ -92,6 +61,33 @@ CREATE TABLE torneo_participantes (
   )
 );
 
+
+#Tabla de equipos#
+create table equipos (
+id_equipo int primary key auto_increment,
+nombre_equipo varchar(50) not null,
+elo_equipo INT NOT NULL DEFAULT 0,
+fecha_creacion DATE NOT NULL
+);
+
+select * from equipos;
+
+
+#Tabla de jugadores#
+CREATE TABLE jugadores (
+id_jugador INT PRIMARY KEY AUTO_INCREMENT,
+usuario VARCHAR(100) NOT NULL,
+elo_jugador INT NOT NULL DEFAULT 0,
+id_equipo INT,
+CONSTRAINT u_equipo FOREIGN KEY (id_equipo) REFERENCES equipos(id_equipo)
+ON DELETE CASCADE
+ON UPDATE CASCADE,
+CONSTRAINT u_usuario UNIQUE(usuario)
+);
+
+#Tabla que relaciona torneos, jugadores y equipos#
+
+
 # Tabla para partidos
 CREATE TABLE enfrentamientos (
   id_enfrentamiento INT PRIMARY KEY AUTO_INCREMENT,
@@ -108,4 +104,6 @@ CREATE TABLE enfrentamientos (
   CONSTRAINT fk_idfase FOREIGN KEY (id_fase) REFERENCES fases_torneo(id_fase),
   CHECK (id_participante_local <> id_participante_visitante)
 );
+
+
 
