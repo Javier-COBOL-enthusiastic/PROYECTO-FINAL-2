@@ -40,6 +40,9 @@ VISUALIZACIÓN DEL PROGRESO
 
 MOSTRAR UN TIPO "ARBOL" CON EL PROGRESO DEL TORNEO
 """
+from tkinter import *
+from tkinter import ttk
+
 
 def hover_closebutton(e):
     close_button["background"] = "red"
@@ -49,9 +52,12 @@ def unhover_closebutton(e):
 def move_window(e):
     root.geometry(f"+{e.x_root}+{e.y_root}")
 
-from tkinter import *
-from tkinter import ttk
-import equipos_gestion
+def set_torneo_main():
+    if(len(torneo_view.grid_info()) == 0):
+        #AGREGAR UN GRID_REMOVE DE LAS OTRAS VIEW POR FAVOR GRACIAS AMEN SALUDOS
+        torneo_view.grid(column=0, row=0)        
+    else:
+        torneo_view.grid_remove()
 
 
 root = Tk()
@@ -64,7 +70,13 @@ titlebar = Frame(root, width=720, height=20, bg="white", bd=3, relief="raised")
 slider = Frame(root, width=200, height=576, bg="#3DADFF", bd=1, relief="groove", highlightcolor="#3DADFF")
 interac = Frame(root, width=520, height=576, bg="white", relief="flat")
 
+torneo_view = Frame(interac, background="white")
 
+agregar_torneo_button = Button(torneo_view, relief="sunken", text="CREAR TORNEO", bd=0, activeforeground="#FF9E42", background="#FF9E42")
+historial_torneo_button = Button(torneo_view, relief="sunken", text="HISTORIAL DE TORNEOS", bd=0, activebackground="#FF9E42", background="#FF9E42")
+
+agregar_torneo_button.grid(column=0, row=0)
+historial_torneo_button.grid(column=0, row=1)
 
 titlebar.grid(column=0, row=0, columnspan=2, sticky="WNSE")
 slider.grid(column=0, row=1, sticky="NWSE")
@@ -86,7 +98,7 @@ logo_torneo = PhotoImage(file="images/control_logo.png")
 logo_equipo = PhotoImage(file="images/equipo_logo.png")
 logo_jugador = PhotoImage(file="images/jugador_logo.png")
 
-torneos_button = Button(slider, text="TORNEOS", image=logo_torneo, compound="right", background="#3DADFF", relief="flat")
+torneos_button = Button(slider, text="TORNEOS", image=logo_torneo, compound="right", background="#3DADFF", relief="flat", command=set_torneo_main)
 equipos_button = Button(slider, text="EQUIPOS", image=logo_equipo, compound="right", background="#3DADFF", relief="flat")
 jugadores_button = Button(slider, text="JUGADORES", image=logo_jugador, compound="right", background="#3DADFF", relief="flat")
 
