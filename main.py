@@ -51,6 +51,7 @@ def move_window(e):
 
 from tkinter import *
 from tkinter import ttk
+import equipos_gestion
 
 
 root = Tk()
@@ -81,8 +82,13 @@ def mostrar_equipos():
     for widget in interac.winfo_children():
         widget.destroy()
 
-    # Creamos un nuevo contenido para la sección de equipos
     Label(interac, text="Gestión de Equipos", font=("Arial", 16, "bold"), bg="white").pack(pady=20)
+
+    entrada = Entry(interac, width=30, fg="gray")
+    entrada.pack(pady=10)
+
+    boton_agregar = Button(interac, text="Ingresar dato", command=lambda: equipos_gestion.agregar_equipo(entrada.get()))
+    boton_agregar.pack(pady=10)
 
 
 close_button = Button(titlebar, text=" X ", foreground="black", background="white", relief="sunken", command=root.destroy, bd=0, activebackground="red")
