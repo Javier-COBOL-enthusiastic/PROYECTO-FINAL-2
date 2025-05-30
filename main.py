@@ -76,20 +76,6 @@ text_titlebar = Label(titlebar, text="KeyPlayer Manager")
 text_titlebar.configure(background="white")
 text_titlebar.grid(column=0, row=0, columnspan=2, padx=300)
 
- # Mostrar un frame para Equipos
-def mostrar_equipos():
-    # Limpiamos el contenido actual del frame interac
-    for widget in interac.winfo_children():
-        widget.destroy()
-
-    Label(interac, text="Gestión de Equipos", font=("Arial", 16, "bold"), bg="white").pack(pady=20)
-
-    entrada = Entry(interac, width=30, fg="gray")
-    entrada.pack(pady=10)
-
-    boton_agregar = Button(interac, text="Ingresar dato", command=lambda: equipos_gestion.agregar_equipo(entrada.get()))
-    boton_agregar.pack(pady=10)
-
 
 close_button = Button(titlebar, text=" X ", foreground="black", background="white", relief="sunken", command=root.destroy, bd=0, activebackground="red")
 close_button.grid(column=1, row=0, sticky="NES")
@@ -101,7 +87,7 @@ logo_equipo = PhotoImage(file="images/equipo_logo.png")
 logo_jugador = PhotoImage(file="images/jugador_logo.png")
 
 torneos_button = Button(slider, text="TORNEOS", image=logo_torneo, compound="right", background="#3DADFF", relief="flat")
-equipos_button = Button(slider, text="EQUIPOS", image=logo_equipo, compound="right", background="#3DADFF", relief="flat", command=mostrar_equipos)
+equipos_button = Button(slider, text="EQUIPOS", image=logo_equipo, compound="right", background="#3DADFF", relief="flat")
 jugadores_button = Button(slider, text="JUGADORES", image=logo_jugador, compound="right", background="#3DADFF", relief="flat")
 
 
