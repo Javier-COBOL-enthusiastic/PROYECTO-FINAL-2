@@ -45,7 +45,7 @@ from tkinter import ttk
 
 
 def hover_closebutton(e):
-    close_button["background"] = "red"
+    close_button["background"] = "red3"
 def unhover_closebutton(e):
     close_button["background"] = "white"
 
@@ -55,10 +55,9 @@ def move_window(e):
 def set_torneo_main():
     if(len(torneo_view.grid_info()) == 0):
         #AGREGAR UN GRID_REMOVE DE LAS OTRAS VIEW POR FAVOR GRACIAS AMEN SALUDOS
-        torneo_view.grid(column=0, row=0)        
+        torneo_view.grid(column=0, row=0, sticky="NWES")        
     else:
         torneo_view.grid_remove()
-
 
 root = Tk()
 root.title("KeyPlayer Manager")
@@ -66,21 +65,27 @@ root.configure(bd=2, highlightthickness=2)
 root.resizable(False, False)
 root.overrideredirect(True)
 
+
+color_boton = "#FFC174"
+
 titlebar = Frame(root, width=720, height=20, bg="white", bd=3, relief="raised")
 slider = Frame(root, width=200, height=576, bg="#3DADFF", bd=1, relief="groove", highlightcolor="#3DADFF")
 interac = Frame(root, width=520, height=576, bg="white", relief="flat")
 
 torneo_view = Frame(interac, background="white")
 
-agregar_torneo_button = Button(torneo_view, relief="sunken", text="CREAR TORNEO", bd=0, activeforeground="#FF9E42", background="#FF9E42")
-historial_torneo_button = Button(torneo_view, relief="sunken", text="HISTORIAL DE TORNEOS", bd=0, activebackground="#FF9E42", background="#FF9E42")
 
-agregar_torneo_button.grid(column=0, row=0)
-historial_torneo_button.grid(column=0, row=1)
+agregar_torneo_button = Button(torneo_view, relief="sunken", text="CREAR TORNEO", bd=0, background=color_boton)
+historial_torneo_button = Button(torneo_view, relief="sunken", text="HISTORIAL DE TORNEOS", bd=0, background=color_boton)
+
+agregar_torneo_button.grid(column=0, row=0,sticky="NWE")
+historial_torneo_button.grid(column=1, row=0, sticky="NWE")
 
 titlebar.grid(column=0, row=0, columnspan=2, sticky="WNSE")
 slider.grid(column=0, row=1, sticky="NWSE")
 interac.grid(column=1, row=1, sticky="NSWE")
+
+
 
 titlebar.bind("<B1-Motion>", move_window)
 
@@ -89,22 +94,26 @@ text_titlebar.configure(background="white")
 text_titlebar.grid(column=0, row=0, columnspan=2, padx=300)
 
 
+
 close_button = Button(titlebar, text=" X ", foreground="black", background="white", relief="sunken", command=root.destroy, bd=0, activebackground="red")
 close_button.grid(column=1, row=0, sticky="NES")
 close_button.bind("<Enter>", hover_closebutton)
 close_button.bind("<Leave>", unhover_closebutton)
 
-logo_torneo = PhotoImage(file="images/control_logo.png")
-logo_equipo = PhotoImage(file="images/equipo_logo.png")
-logo_jugador = PhotoImage(file="images/jugador_logo.png")
+logo_torneo = PhotoImage(file="images/control_logo_mini.png")
+logo_equipo = PhotoImage(file="images/equipo_logo_mini.png")
+logo_jugador = PhotoImage(file="images/jugador_logo_mini.png")
 
 torneos_button = Button(slider, text="TORNEOS", image=logo_torneo, compound="right", background="#3DADFF", relief="flat", command=set_torneo_main)
 equipos_button = Button(slider, text="EQUIPOS", image=logo_equipo, compound="right", background="#3DADFF", relief="flat")
 jugadores_button = Button(slider, text="JUGADORES", image=logo_jugador, compound="right", background="#3DADFF", relief="flat")
 
 
-torneos_button.grid(column=0, row=1, columnspan=10, pady=5)
-equipos_button.grid(column=0, row=2, columnspan=10, pady=5)
-jugadores_button.grid(column=0, row=3, columnspan=10, pady=5)
+torneos_button.grid(column=0, row=1, sticky="NSEW")
+equipos_button.grid(column=0, row=2, sticky="NSEW")
+jugadores_button.grid(column=0, row=3, sticky="NSEW")
+
+version = Label(slider, text="version 1.0.9", background="#3DADFF", relief="flat")
+version.grid(column=0, row=4,sticky="SW")
 
 root.mainloop()
