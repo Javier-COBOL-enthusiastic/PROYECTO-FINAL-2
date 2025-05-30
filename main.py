@@ -85,11 +85,24 @@ torneos_button = Button(slider, text="TORNEOS", background="#3DADFF", relief="fl
 equipos_button = Button(slider, text="EQUIPOS", background="#3DADFF", relief="flat")
 jugadores_button = Button(slider, text="JUGADORES", background="#3DADFF", relief="flat")
 
-#torneos_logo = Label(image=)
+logo_torneo = PhotoImage(file="images/control_logo.png")
+logo_equipo = PhotoImage(file="images/equipo_logo.png")
+logo_jugador = PhotoImage(file="images/jugador_logo.png")
 
-torneos_button.grid(column=0, row=1, padx=70)
+
+
+torneo_logo = Label(slider, image=logo_torneo, background="#3DADFF")
+equipo_logo = Label(slider, image=logo_equipo, background="#3DADFF")
+jugador_logo = Label(slider, image=logo_jugador, background="#3DADFF")
+
+torneos_button.grid(column=0, row=1)
+torneo_logo.grid(column=1, row=1)
+
 equipos_button.grid(column=0, row=2)
+equipo_logo.grid(column=1, row=2)
+
 jugadores_button.grid(column=0, row=3)
+jugador_logo.grid(column=1, row=3)
 
 
 
