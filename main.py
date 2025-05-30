@@ -51,6 +51,8 @@ def move_window(e):
 
 from tkinter import *
 from tkinter import ttk
+
+
 root = Tk()
 root.title("KeyPlayer Manager")
 root.configure(bd=2, highlightthickness=2)
@@ -73,6 +75,14 @@ text_titlebar = Label(titlebar, text="KeyPlayer Manager")
 text_titlebar.configure(background="white")
 text_titlebar.grid(column=0, row=0, columnspan=2, padx=300)
 
+ # Mostrar un frame para Equipos
+def mostrar_equipos():
+    # Limpiamos el contenido actual del frame interac
+    for widget in interac.winfo_children():
+        widget.destroy()
+
+    # Creamos un nuevo contenido para la sección de equipos
+    Label(interac, text="Gestión de Equipos", font=("Arial", 16, "bold"), bg="white").pack(pady=20)
 
 
 close_button = Button(titlebar, text=" X ", foreground="black", background="white", relief="sunken", command=root.destroy, bd=0, activebackground="red")
@@ -80,42 +90,17 @@ close_button.grid(column=1, row=0, sticky="NES")
 close_button.bind("<Enter>", hover_closebutton)
 close_button.bind("<Leave>", unhover_closebutton)
 
-
-torneos_button = Button(slider, text="TORNEOS", background="#3DADFF", relief="flat")
-equipos_button = Button(slider, text="EQUIPOS", background="#3DADFF", relief="flat")
-jugadores_button = Button(slider, text="JUGADORES", background="#3DADFF", relief="flat")
-
 logo_torneo = PhotoImage(file="images/control_logo.png")
 logo_equipo = PhotoImage(file="images/equipo_logo.png")
 logo_jugador = PhotoImage(file="images/jugador_logo.png")
 
+torneos_button = Button(slider, text="TORNEOS", image=logo_torneo, compound="right", background="#3DADFF", relief="flat")
+equipos_button = Button(slider, text="EQUIPOS", image=logo_equipo, compound="right", background="#3DADFF", relief="flat", command=mostrar_equipos)
+jugadores_button = Button(slider, text="JUGADORES", image=logo_jugador, compound="right", background="#3DADFF", relief="flat")
 
 
-torneo_logo = Label(slider, image=logo_torneo, background="#3DADFF")
-equipo_logo = Label(slider, image=logo_equipo, background="#3DADFF")
-jugador_logo = Label(slider, image=logo_jugador, background="#3DADFF")
-
-torneos_button.grid(column=0, row=1)
-torneo_logo.grid(column=1, row=1)
-
-equipos_button.grid(column=0, row=2)
-equipo_logo.grid(column=1, row=2)
-
-jugadores_button.grid(column=0, row=3)
-jugador_logo.grid(column=1, row=3)
-
-
-
+torneos_button.grid(column=0, row=1, columnspan=10, pady=5)
+equipos_button.grid(column=0, row=2, columnspan=10, pady=5)
+jugadores_button.grid(column=0, row=3, columnspan=10, pady=5)
 
 root.mainloop()
-
-
-
-
-
-
-
-
-
-    
-        
