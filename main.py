@@ -44,6 +44,7 @@ from tkinter import *
 from tkinter import ttk
 from tkinter import font
 from datetime import datetime
+import torneos_gestion
 
 
 def hover_closebutton(e):
@@ -175,15 +176,30 @@ agregar_torneo_vars = [
     StringVar()
 ]
 
-Juegos = ("CSGO", "VALORANT", "WOW", "LOL") #Esta wea se llenaria con la base de datos @20220270
+def cargar_videojuegos():
+    resultados = torneos_gestion.ver_videojuegos()
+    nombres = [r[1] for r in resultados]  # Solo los nombres, sin los IDs
+    menu = agregar_torneo_entrys[1]["menu"]
+    menu.delete(0, "end")  # Limpia opciones anteriores
 
+    # Añadimos cada nuevo nombre
+    for nombre in nombres:
+        menu.add_command(label=nombre, command=lambda v=nombre: agregar_torneo_vars[1].set(v))
+    
+    agregar_torneo_vars[1].set("(Selecciona un juego)")
+
+# Inicializa la variable con un valor por defecto
+agregar_torneo_vars[1].set("(Selecciona un juego)")
+
+# Luego crea el OptionMenu una sola vez (con valores vacíos al principio)
 agregar_torneo_entrys = [
     Entry(torneo_view, textvariable=agregar_torneo_vars[0]),
-    OptionMenu(torneo_view, agregar_torneo_vars[1], "(...)", *Juegos),
+    OptionMenu(torneo_view, agregar_torneo_vars[1], ""),
     Entry(torneo_view, textvariable=agregar_torneo_vars[2]),
     Entry(torneo_view, textvariable=agregar_torneo_vars[3]),
     Entry(torneo_view, textvariable=agregar_torneo_vars[4])
 ]
+
 crear_command = lambda : push_torneo_database(agregar_torneo_vars)
 crear_torneo_button = Button(torneo_view, relief="sunken", text="CREAR", bd=0, background=color_boton, font="customFont", command=crear_command)
 
@@ -226,5 +242,7 @@ jugadores_button.grid(column=0, row=3, sticky="NSEW")
 
 version = Label(slider, text="version 1.0.9", background="#3DADFF", relief="flat", font="customFont")
 version.grid(column=0, row=4,sticky="SW")
+cargar_videojuegos()
+
 
 root.mainloop()
