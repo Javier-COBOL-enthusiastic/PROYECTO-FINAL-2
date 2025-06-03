@@ -41,11 +41,13 @@ VISUALIZACIÓN DEL PROGRESO
 MOSTRAR UN TIPO "ARBOL" CON EL PROGRESO DEL TORNEO
 """
 from tkinter import *
-from tkinter import ttk
+from tkinter import messagebox
 from tkinter import font
-from datetime import datetime
-import torneos_gestion
 
+from torneos_gestion import *
+from torneo import *
+
+from Elements import *
 
 def hover_closebutton(e):
     close_button["background"] = "red3"
@@ -75,62 +77,34 @@ def reset_mouse_pos(e):
     global mouse_y
     mouse_y = mouse_x = -1    
 
-def set_torneo_main():
-    if(len(torneo_view.grid_info()) == 0):
-        #AGREGAR UN GRID_REMOVE DE LAS OTRAS VIEW POR FAVOR GRACIAS SALUDOS
-        torneo_view.grid(column=0, row=0, sticky="NSEW")        
+def set_main(who : Frame):
+    views = [torneo_view, jugadores_view]
+    views.pop(views.index(who))
+    if(len(who.grid_info()) == 0):
+        for frame in views:
+            frame.grid_remove()
+        who.grid(column=0, row=0, sticky="NSEW")
     else:
-        torneo_view.grid_remove()
+        who.grid_remove()
 
 
-def set_crear_torneo():
-    agregar_torneo_button.grid_remove()
-    historial_torneo_button.grid_remove()
-    n = 0
-    for x in range(len(agregar_torneo_vars)):
-        agregar_torneo_textos[x].grid(column=0, row=n)
-        agregar_torneo_entrys[x].grid(column=1, row=n)
-        n+=1
-    crear_torneo_button.grid(column=2, row=n)
+def crear_torneo():
+    global torneos
+    global creacion_torneo_GUI
 
-def validar_formato_fecha(fecha : str):
-    if(len(fecha) <= 0):
-        pass
-    if(fecha.count("/") < 1): #Se puede hacer por separado pero pq me dieron ganas asi
-        pass
-        
-    fecha = fecha.split("/")
-    if(len(fecha[1]) < 2): #Arreglando por si solo puso 25/6/2025 ejemplo
-        fecha[1] = '0' + fecha[1]    
+    try:
+        res = Torneo(creacion_torneo_GUI)
+        torneos.append(res)
+        messagebox.showinfo("Exito!", "El torneo ha sido creado con exito!")    
+        creacion_torneo_GUI.clear()
+    except ValueError: messagebox.showerror(title="N° de Jugadores por Equipo Invalido", message="El numero de jugadores por equipo menor o igual que 0...")
+    except FechaInvalida: messagebox.showerror(title="Fecha invalida", message="La fecha de fin es antes que la fecha de fin...")
+    except FormatoFechaInvalido: messagebox.showerror(title="Formato de fecha invalido", message="El formato de la fecha es invalido, formato valido: DD/MM/YYYY")        
+    except JuegoInvalido: messagebox.showerror(title="Juego invalido", message="El juego seleccionado es invalido")     
+    except NombreInvalido: messagebox.showerror(title="Nombre invalido", message="El nombre del torneo es invalido")     
 
-    fecha = str.join("/", fecha)
 
-def push_torneo_database(ops : list):
-    datos_manejables = []
-    for x in ops:
-        datos_manejables.append(x.get())
-
-    if(datos_manejables[1] == "(...)"): #Son las 12AM tengo hueva de hacer las dialogwindows con los warnings/errores
-        pass
-
-    validar_formato_fecha(datos_manejables[2])
-    validar_formato_fecha(datos_manejables[3])
-   
-        
-    f_1 = datetime.strptime(datos_manejables[2], "%d/%m/%Y")
-    f_2 = datetime.strptime(datos_manejables[3], "%d/%m/%Y")
-    
-    if(f_2 < f_1): #el inicio es despues del fin xd????
-        pass
-    
-    if(not datos_manejables[-1].isdecimal()): #ver si es numero      
-        pass
-
-    datos_manejables[-1] = int(datos_manejables[-1]) #equipos de 0 personas epicos
-    if(datos_manejables[-1] < 1):
-        pass
-    
-    #Despues de esto ya se sube estos datos a la base de datos shocked @20220270
+#/----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------/
 
 root = Tk()
 root.title("KeyPlayer Manager")
@@ -145,104 +119,89 @@ font.Font(family="Roman", name="customFont", size=12)
 
 color_boton = "#FFC174"
 
+#/----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------/
+
 titlebar = Frame(root, width=720, height=20, bg="white", bd=3, relief="raised")
-slider = Frame(root,  bg="#3DADFF", bd=1, relief="groove", highlightcolor="#34A1EF")
-interac = Frame(root, bg="white")
-
-
-torneo_view = Frame(interac, background="white")
-
-
-agregar_torneo_button = Button(torneo_view, relief="sunken", text="CREAR TORNEO", bd=0, background=color_boton, font="customFont", command=set_crear_torneo)
-historial_torneo_button = Button(torneo_view, relief="sunken", text="HISTORIAL DE TORNEOS", bd=0, background=color_boton, font="customFont")
-
-agregar_torneo_button.grid(column=0, row=0,sticky="NWE")
-historial_torneo_button.grid(column=1, row=0, sticky="NWE")
-
-agregar_torneo_textos = [
-    Label(torneo_view, text="Nombre del Torneo:", font="customFont", justify="center", background="white"),
-    Label(torneo_view, text="Juego: ", font="customFont", justify="center", background="white"),
-    Label(torneo_view, text="Fecha de inicio", font="customFont", justify="center", background="white"),
-    Label(torneo_view, text="Fecha de fin", font="customFont", justify="center", background="white"),
-    Label(torneo_view, text="N° de Personas por equipo:", font="customFont", wraplength=150, justify="center", background="white"),
-]
-
-
-agregar_torneo_vars = [
-    StringVar(),
-    StringVar(),
-    StringVar(),
-    StringVar(),
-    StringVar()
-]
-
-def cargar_videojuegos():
-    resultados = torneos_gestion.ver_videojuegos()
-    nombres = [r[1] for r in resultados]  # Solo los nombres, sin los IDs
-    menu = agregar_torneo_entrys[1]["menu"]
-    menu.delete(0, "end")  # Limpia opciones anteriores
-
-    # Añadimos cada nuevo nombre
-    for nombre in nombres:
-        menu.add_command(label=nombre, command=lambda v=nombre: agregar_torneo_vars[1].set(v))
-    
-    agregar_torneo_vars[1].set("(Selecciona un juego)")
-
-# Inicializa la variable con un valor por defecto
-agregar_torneo_vars[1].set("(Selecciona un juego)")
-
-# Luego crea el OptionMenu una sola vez (con valores vacíos al principio)
-agregar_torneo_entrys = [
-    Entry(torneo_view, textvariable=agregar_torneo_vars[0]),
-    OptionMenu(torneo_view, agregar_torneo_vars[1], ""),
-    Entry(torneo_view, textvariable=agregar_torneo_vars[2]),
-    Entry(torneo_view, textvariable=agregar_torneo_vars[3]),
-    Entry(torneo_view, textvariable=agregar_torneo_vars[4])
-]
-
-crear_command = lambda : push_torneo_database(agregar_torneo_vars)
-crear_torneo_button = Button(torneo_view, relief="sunken", text="CREAR", bd=0, background=color_boton, font="customFont", command=crear_command)
-
-
-titlebar.pack()
-slider.pack(anchor="nw", fill="both", side="left")
-interac.pack(anchor="ne", fill="both", side="right", expand=True)
-# titlebar.grid(column=0, row=0, columnspan=2, sticky="NSEW")
-# slider.grid(column=0, row=1, sticky="NS")
-# interac.grid(column=1, row=1, sticky="NSEW")
-
 titlebar.bind("<B1-Motion>", move_window)
 titlebar.bind("<B1-ButtonRelease>", reset_mouse_pos)
 
 text_titlebar = Label(titlebar, text="KeyPlayer Manager")
 text_titlebar.configure(background="white")
-text_titlebar.grid(column=0, row=0, columnspan=2, padx=300)
 
 text_titlebar.bind("<B1-Motion>", move_window)
 text_titlebar.bind("<B1-ButtonRelease>", reset_mouse_pos)
 
 
 close_button = Button(titlebar, text=" X ", foreground="black", background="white", relief="sunken", command=root.destroy, bd=0, activebackground="red")
-close_button.grid(column=1, row=0, sticky="NES")
 close_button.bind("<Enter>", hover_closebutton)
 close_button.bind("<Leave>", unhover_closebutton)
 
+text_titlebar.grid(column=0, row=0, columnspan=2, padx=300)
+close_button.grid(column=1, row=0, sticky="NES")
+titlebar.pack()
+
+#/----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------/
+
+slider = Frame(root,  bg="#3DADFF", bd=1, relief="groove", highlightcolor="#34A1EF")
+interac = Frame(root, bg="white")
+slider.pack(anchor="nw", fill="both", side="left")
+interac.pack(anchor="ne", fill="both", side="right", expand=True)
+
+#/----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------/
+
+torneo_view = Frame(interac, background="white")
+set_torneo_view = lambda : set_main(torneo_view)
+
 logo_torneo = PhotoImage(file="images/control_logo_mini.png")
-logo_equipo = PhotoImage(file="images/equipo_logo_mini.png")
-logo_jugador = PhotoImage(file="images/jugador_logo_mini.png")
+torneos_button = Button(slider, text="TORNEOS", image=logo_torneo, compound="right", background="#3DADFF", relief="flat", command=set_torneo_view, font="customFont")
 
-torneos_button = Button(slider, text="TORNEOS", image=logo_torneo, compound="right", background="#3DADFF", relief="flat", command=set_torneo_main, font="customFont")
-equipos_button = Button(slider, text="EQUIPOS", image=logo_equipo, compound="right", background="#3DADFF", relief="flat", font="customFont")
-jugadores_button = Button(slider, text="JUGADORES", image=logo_jugador, compound="right", background="#3DADFF", relief="flat", font="customFont")
+agregar_torneo_button = Button(torneo_view, text="Crear", command=crear_torneo)
 
+opciones_creacion_torneo = {"Nombre del Torneo:" : "ENTRY", 
+        "Juego:" : "OPTIONMENU",
+        "Fecha de inicio:" : "ENTRY",
+        "Fecha de fin:" : "ENTRY",  
+        "N° de Personas por equipo:" : "ENTRY"}
 
+creacion_torneo_GUI = GUIEntry(torneo_view, 1, **opciones_creacion_torneo)
+
+juegos = [x[1] for x in ver_videojuegos()]
+creacion_torneo_GUI.load_option_menu("Juego:", juegos)
+
+creacion_torneo_GUI.show()
+
+torneos = []
+
+agregar_torneo_button.grid(column=0, row=0)
 torneos_button.grid(column=0, row=1, sticky="NSEW")
-equipos_button.grid(column=0, row=2, sticky="NSEW")
+
+#/----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------/
+
+
+jugadores_view = Frame(interac, background="white")
+set_jugadores_view = lambda : set_main(jugadores_view)
+
+logo_jugador = PhotoImage(file="images/jugador_logo_mini.png")
+jugadores_button = Button(slider, text="JUGADORES", image=logo_jugador, compound="right", background="#3DADFF", relief="flat", font="customFont", command=set_jugadores_view)
+
+jugadores_texto = ["ID", "JUGADOR", "EDAD", "MÁS INFORAMCION"]
+
+info_ver_jugadores =GUIInformation(jugadores_view, jugadores_texto)
+
+info_ver_jugadores.show()
 jugadores_button.grid(column=0, row=3, sticky="NSEW")
+
+#/----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------/
+
+logo_equipo = PhotoImage(file="images/equipo_logo_mini.png")
+equipos_button = Button(slider, text="EQUIPOS", image=logo_equipo, compound="right", background="#3DADFF", relief="flat", font="customFont")
+
+equipos_button.grid(column=0, row=2, sticky="NSEW")
+
+#/----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------/
+
 
 version = Label(slider, text="version 1.0.9", background="#3DADFF", relief="flat", font="customFont")
 version.grid(column=0, row=4,sticky="SW")
-cargar_videojuegos()
-
 
 root.mainloop()
