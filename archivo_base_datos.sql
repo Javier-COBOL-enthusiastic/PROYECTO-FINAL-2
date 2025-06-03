@@ -5,16 +5,27 @@ create database gestion_videojuegos;
 use gestion_videojuegos;
 
 create table videojuegos(
-id_juego int primary key auto_increment,
+id_videojuego int primary key auto_increment,
 nombre_videojuego varchar(100) not null,
 imagen_videojuego varchar(225)
 );
+
+
+insert into videojuegos (nombre_videojuego) VALUES
+("MInecraft"),
+("LOL"),
+("Roblox"),
+("Papulinces II");
+
+SELECT * FROM videojuegos;
+SELECT id_videojuego, nombre_videojuego FROM videojuegos;
 
 #Tabla de fases del torneo#
 create table fases_torneo(
 id_fase int primary key auto_increment,
 fase varchar(20) not null
 );
+
 
 insert into fases_torneo values
 (1, "fase de grupos"),
@@ -24,7 +35,7 @@ insert into fases_torneo values
 (5, "final");
 
 select * from fases_torneo;
-
+select id_fase, fase FROM fases_torneo;
 
 #Tabla de torneos#
 CREATE TABLE torneos (
@@ -32,8 +43,8 @@ id_torneo INT PRIMARY KEY AUTO_INCREMENT,
 nombre_torneo VARCHAR(100) NOT NULL,
 fecha_inicio DATE NOT NULL,
 fecha_finalizacion DATE NOT NULL,
-id_fase INT,
-tipo_participante ENUM('equipo', 'jugador') NOT NULL,
+id_fase INT NOT NULL,
+tipo_participante ENUM('Equipos', 'En solitario') NOT NULL,
 id_videojuego INT NOT NULL,
 CONSTRAINT fk_fase FOREIGN KEY (id_fase) REFERENCES fases_torneo(id_fase)
 ON DELETE CASCADE
@@ -76,8 +87,10 @@ select * from equipos;
 #Tabla de jugadores#
 CREATE TABLE jugadores (
 id_jugador INT PRIMARY KEY AUTO_INCREMENT,
+nombre_jugador VARCHAR(100) NOT NULL,
 usuario VARCHAR(100) NOT NULL,
 elo_jugador INT NOT NULL DEFAULT 0,
+edad_jugador INT NOT NULL CHECK (edad > 0 and edad < 80),
 id_equipo INT,
 CONSTRAINT u_equipo FOREIGN KEY (id_equipo) REFERENCES equipos(id_equipo)
 ON DELETE CASCADE
@@ -104,6 +117,3 @@ CREATE TABLE enfrentamientos (
   CONSTRAINT fk_idfase FOREIGN KEY (id_fase) REFERENCES fases_torneo(id_fase),
   CHECK (id_participante_local <> id_participante_visitante)
 );
-
-
-

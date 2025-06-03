@@ -39,16 +39,17 @@ class GUIEntry:
             else: self.widgets[x].grid_remove()
             self.row_pad -=1    
 
-    def load_option_menu(self, name,*data):
+    def load_option_menu(self, name, data):
         n = 0
         for x in self.data.keys():
-            if(x == name and self.data[x] == "OPTIONMENU"):
+            if x == name and self.data[x] == "OPTIONMENU":
                 self.vars[n].set("(...)")
                 self.widgets[n][0]['menu'].delete(0, "end")
                 for y in data:
-                    self.widgets[n][0]['menu'].add_command(label=y, command=lambda v=y: self.vars[1].set(v))
-                break                
-            n+=1
+                    self.widgets[n][0]['menu'].add_command(label=y, command=lambda v=y: self.vars[n].set(v))
+                break
+            n += 1
+
     
     def clear(self):
         for var in self.vars:

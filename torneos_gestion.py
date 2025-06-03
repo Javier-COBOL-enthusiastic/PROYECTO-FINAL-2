@@ -3,13 +3,6 @@
 from conexion_db import obtener_conexion
 from datetime import datetime
 
-def ver_torneos():
-    conexion = obtener_conexion()
-    cursor = conexion.cursor()
-    cursor.execute("SELECT * FROM torneos")
-    resultados = cursor.fetchall()
-    conexion.close()
-    return resultados
 
 # Función para traer los id y nombres de los videojuegos para cargar en el combobox
 def ver_videojuegos():
@@ -29,6 +22,18 @@ def ver_fases():
     conexion.close()
     return resultados
 
+# Función para traer los id, nombres y usuarios de los jugadores para cargar en el combobox
+def ver_jugadores():
+    conexion = obtener_conexion()
+    cursor = conexion.cursor()
+    cursor.execute("SELECT id_jugador, nombre_jugador, usuario FROM jugadores")
+    resultados = cursor.fetchall()
+    conexion.close()
+    return resultados
+
+# Manejo de datos, METODO CRUD
+
+# Agregar (Create)
 def agregar_torneos(nombre, fecha_inicio, fecha_fin, id_fase, id_videojuego):
     # La fecha de creación se establece automáticamente al momento de agregar el equipo
     fecha_creacion = datetime.now().date()
@@ -38,6 +43,24 @@ def agregar_torneos(nombre, fecha_inicio, fecha_fin, id_fase, id_videojuego):
     conexion.commit()
     conexion.close()
 
+# Leer o vizualizar (Read)
+def ver_torneos():
+    conexion = obtener_conexion()
+    cursor = conexion.cursor()
+    cursor.execute("SELECT * FROM torneos")
+    resultados = cursor.fetchall()
+    conexion.close()
+    return resultados
+
+# Actualizar (Update)
+def actualizar_torneos(id_torneo, nuevo_torneo, nueva_fecha_inicio, nueva_fecha_fin, nuevo_id_fase, nuevo_id_videojuego):
+    conexion = obtener_conexion()
+    cursor = conexion.cursor()
+    cursor.execute("UPDATE torneos SET nombre_torneo = %s, fecha_inicio = %s, fecha_finalizacion = %s, id_fase = %s, id_videojuego = %s WHERE id_torneo = %s", (nuevo_torneo, nueva_fecha_inicio, nueva_fecha_fin, nuevo_id_fase, nuevo_id_videojuego, id_torneo))
+    conexion.commit()
+    conexion.close()
+
+# Eliminar (Delete)
 def eliminar_torneos(id_torneo):
     conexion = obtener_conexion()
     cursor = conexion.cursor()
@@ -45,9 +68,3 @@ def eliminar_torneos(id_torneo):
     conexion.commit()
     conexion.close()
 
-def actualizar_torneos(id_torneo, nuevo_torneo, nueva_fecha_inicio, nueva_fecha_fin, nuevo_id_fase, nuevo_id_videojuego):
-    conexion = obtener_conexion()
-    cursor = conexion.cursor()
-    cursor.execute("UPDATE torneos SET nombre_torneo = %s, fecha_inicio = %s, fecha_finalizacion = %s, id_fase = %s, id_videojuego = %s WHERE id_torneo = %s", (nuevo_torneo, nueva_fecha_inicio, nueva_fecha_fin, nuevo_id_fase, nuevo_id_videojuego, id_torneo))
-    conexion.commit()
-    conexion.close()

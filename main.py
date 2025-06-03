@@ -43,6 +43,7 @@ MOSTRAR UN TIPO "ARBOL" CON EL PROGRESO DEL TORNEO
 from tkinter import *
 from tkinter import messagebox
 from tkinter import font
+from tkinter import ttk
 
 from torneos_gestion import *
 from torneo import *
@@ -88,6 +89,7 @@ def set_main(who : Frame):
         who.grid_remove()
 
 
+
 def crear_torneo():
     global torneos
     global creacion_torneo_GUI
@@ -97,7 +99,7 @@ def crear_torneo():
         torneos.append(res)
         messagebox.showinfo("Exito!", "El torneo ha sido creado con exito!")    
         creacion_torneo_GUI.clear()
-    except ValueError: messagebox.showerror(title="N° de Jugadores por Equipo Invalido", message="El numero de jugadores por equipo menor o igual que 0...")
+    
     except FechaInvalida: messagebox.showerror(title="Fecha invalida", message="La fecha de fin es antes que la fecha de fin...")
     except FormatoFechaInvalido: messagebox.showerror(title="Formato de fecha invalido", message="El formato de la fecha es invalido, formato valido: DD/MM/YYYY")        
     except JuegoInvalido: messagebox.showerror(title="Juego invalido", message="El juego seleccionado es invalido")     
@@ -140,6 +142,7 @@ text_titlebar.grid(column=0, row=0, columnspan=2, padx=300)
 close_button.grid(column=1, row=0, sticky="NES")
 titlebar.pack()
 
+
 #/----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------/
 
 slider = Frame(root,  bg="#3DADFF", bd=1, relief="groove", highlightcolor="#34A1EF")
@@ -147,33 +150,63 @@ interac = Frame(root, bg="white")
 slider.pack(anchor="nw", fill="both", side="left")
 interac.pack(anchor="ne", fill="both", side="right", expand=True)
 
+
+
+
 #/----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------/
 
+
 torneo_view = Frame(interac, background="white")
-set_torneo_view = lambda : set_main(torneo_view)
+set_torneo_view = lambda: set_main(torneo_view)
 
 logo_torneo = PhotoImage(file="images/control_logo_mini.png")
-torneos_button = Button(slider, text="TORNEOS", image=logo_torneo, compound="right", background="#3DADFF", relief="flat", command=set_torneo_view, font="customFont")
+torneos_button = Button(slider, text="TORNEOS", image=logo_torneo, compound="right",
+                        background="#3DADFF", relief="flat", command=set_torneo_view, font="customFont")
+torneos_button.grid(column=0, row=1, sticky="NSEW")
 
+# Botón crear torneo arriba
 agregar_torneo_button = Button(torneo_view, text="Crear", command=crear_torneo)
+agregar_torneo_button.grid(column=0, row=0, pady=10, padx=10, sticky="w")
 
-opciones_creacion_torneo = {"Nombre del Torneo:" : "ENTRY", 
-        "Juego:" : "OPTIONMENU",
-        "Fecha de inicio:" : "ENTRY",
-        "Fecha de fin:" : "ENTRY",  
-        "N° de Personas por equipo:" : "ENTRY"}
+# Frame para el formulario (todos los campos)
+formulario_frame = Frame(torneo_view, bg="white")
+formulario_frame.grid(row=1, column=0, sticky="nsew", padx=10, pady=(0, 20))
 
-creacion_torneo_GUI = GUIEntry(torneo_view, 1, **opciones_creacion_torneo)
+opciones_creacion_torneo = {
+    "Nombre del Torneo:" : "ENTRY", 
+    "Fecha de inicio:" : "ENTRY",
+    "Fecha de fin:" : "ENTRY", 
+    "Tipo de torneo" : "OPTIONMENU", 
+    "Fase inicial del torneo:" : "OPTIONMENU",
+    "Juego:" : "OPTIONMENU"
+}
 
+creacion_torneo_GUI = GUIEntry(formulario_frame, 1, **opciones_creacion_torneo)
 juegos = [x[1] for x in ver_videojuegos()]
+fase_torneo = [x[1] for x in ver_fases()]
+tipo_torneo = [x[1] for x in (("Equipos"), ("En solitario"))]
 creacion_torneo_GUI.load_option_menu("Juego:", juegos)
-
+creacion_torneo_GUI.load_option_menu("Fase inicial del torneo:", fase_torneo)
 creacion_torneo_GUI.show()
 
-torneos = []
 
-agregar_torneo_button.grid(column=0, row=0)
-torneos_button.grid(column=0, row=1, sticky="NSEW")
+
+# Frame para la tabla
+tabla_frame = Frame(torneo_view, bg="white")
+tabla_frame.grid(row=2, column=0, sticky="nsew", pady=20, padx=10)
+
+torneo_view.grid_rowconfigure(2, weight=1)
+torneo_view.grid_columnconfigure(0, weight=1)
+
+tabla = ttk.Treeview(tabla_frame, columns=("id_torneo", "nombre_torneo"), show="headings")
+tabla.heading("id_torneo", text="ID")
+tabla.heading("nombre_torneo", text="Nombre del Torneo")
+tabla.column("id_torneo", anchor="center", stretch=True)
+tabla.column("nombre_torneo", anchor="center", stretch=True)
+tabla.pack(fill="both", expand=True)
+
+ver_torneos()
+
 
 #/----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------/
 
