@@ -1,11 +1,15 @@
 from tkinter import *
+from tkinter import ttk
+
 
 class GUIEntry:
-    def __init__(self, root, row_pad = 0, **inputs_n_type):
+    def __init__(self, root, font, row_pad = 0, **inputs_n_type):
         self.root = root                   
         self.data : dict = inputs_n_type
         
         self.row_pad = row_pad
+
+        self.font = font
 
         self.vars = []
         self.widgets = []
@@ -17,11 +21,12 @@ class GUIEntry:
             self.vars.append(StringVar())
             match type: #se puede agregar mas si necesario XD
                 case "ENTRY":
-                    wid = Entry(self.root, textvariable=self.vars[-1], background=color)
+                    wid = Entry(self.root, textvariable=self.vars[-1], background=color, font=self.font)
                 case "OPTIONMENU":
-                    wid = OptionMenu(self.root, variable=self.vars[-1], value=""),
+                    wid = OptionMenu(self.root,variable=self.vars[-1], value="")
+                    wid.configure(font=self.font)                    
                     self.vars[-1].set('(...)')
-            texto = Label(self.root, text=name, background=color)
+            texto = Label(self.root, text=name, background=color, font=self.font)
             self.widgets.append(wid)
             self.text.append(texto)
 
@@ -66,15 +71,15 @@ class GUIEntry:
         return self.row_pad
 
 class GUIInformation: #jaja clase inutil :v
-    def __init__(self, root, *inputs):
+    def __init__(self, font, root, *inputs):
         self.root = root    
         self.text = []
         self.row_pad = 0 
         color = root.cget("background")
 
-        #font = root.cget()
+        self.font = font
         for name in inputs:
-            texto = Label(self.root, text=name, background=color, font="customFont")
+            texto = Label(self.root, text=name, background=color, font=self.font)
             self.text.append(texto)        
 
     def show(self):                       
@@ -88,15 +93,43 @@ class GUIInformation: #jaja clase inutil :v
             self.row_pad -=1    
 
 class GUITable:
-    def __init__(self, root, *keys):
-        self.root = root
-        self.keys = keys
+    def __handle_click__(self, event):
+        if(self.table.identify_region(event.x, event.y) == "separator"):
+            return "break"
 
-        self.widgets = {}
-        color = root.cget("background")
-        for key in self.keys:
-            texto_ev = Label(self.root, background=color, relief="raised", font="customFont")
-            self.widgets[key] = [texto_ev]
+    def __init__(self, root, font, keys : tuple):
+        self.root = root
+        self.keys = keys                
+        self.font = font
+        
+        self.table = ttk.Treeview(self.root, selectmode="none", columns=self.keys[0], show="headings")                
+        self.table.configure(selectmode="none")
+        self.table.bind("<Button-1>", self.__handle_click__)
+        
+        for c in range(len(self.keys[0])):
+            self.table.heading(self.keys[0][c], text=self.keys[1][c], anchor="center")            
+            self.table.column(self.keys[0][c], anchor="center", stretch=False)
+                
+            
+        self.shown = False
+
+    def insert_item(self, *info):          
+        self.table.insert(parent="",index="end", values=info)
+    
+    def configure_width_columns(self, *config):
+        for c in range(len(self.keys[0])):
+            self.table.column(self.keys[0][c], width=config[c])
+
+
+
+    def show(self):
+        self.show = True
+        self.table.pack(fill="x", anchor="s")
+    
+    def hide(self):
+        if(self.show):
+            self.table.pack_forget()        
+
 
     def add_elements(self, *elements):
         for elem in elements: #pa el futuro cercano

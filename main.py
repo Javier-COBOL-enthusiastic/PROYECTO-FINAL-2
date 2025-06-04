@@ -49,7 +49,7 @@ from torneos_gestion import *
 from torneo import *
 
 from Elements import *
-
+"""
 def hover_closebutton(e):
     close_button["background"] = "red3"
 def unhover_closebutton(e):
@@ -104,137 +104,122 @@ def crear_torneo():
     except FormatoFechaInvalido: messagebox.showerror(title="Formato de fecha invalido", message="El formato de la fecha es invalido, formato valido: DD/MM/YYYY")        
     except JuegoInvalido: messagebox.showerror(title="Juego invalido", message="El juego seleccionado es invalido")     
     except NombreInvalido: messagebox.showerror(title="Nombre invalido", message="El nombre del torneo es invalido")     
-
+"""
 
 #/----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------/
+
+def set_main(who : Frame):
+    if(mainmenu.cget("background") == bg1):
+        mainmenu.configure(background=bg2)
+        mainmenu.pack_configure(padx=0, anchor="nw", side="left", fill="y", after=None)
+        close_button.pack_configure(anchor="ne", side="right", expand=True)
+        bienvenida.grid_remove()
+        logo.grid_configure(column=0, row=0, pady=30)
+        logo.configure(background=bg2)
+        jugador_button.grid_configure(column=0, row=1, pady=0, sticky="NSEW")
+        equipos_button.grid_configure(column=0, row=2, pady=0, sticky="NSEW")
+        torneo_button.grid_configure(column=0, row=3, pady=0, sticky="NSEW")
+        
+
+    views = [torneo_view, jugadores_view, equipos_view]
+    views.pop(views.index(who))    
+    for frame in views:
+        frame.pack_forget()
+    who.pack(side="right")    
+
 
 root = Tk()
 root.title("KeyPlayer Manager")
-root.configure(bd=2, highlightthickness=2)
-root.geometry("720x576+0+0")
+root.geometry("680x420+0+0")
 root.resizable(False, False)
 root.overrideredirect(True)
 
-font.Font(family="Roman", name="customFont", size=12)
+bg1 = "#EDEDED"
+bg2 = "#9FACE8"
+
+color_boton = "#688CCA"
+
+bigFont = font.Font(family="Nirmala UI", size=14, weight="bold")
+bigFont.config(size=20)
+
+smallFont = font.Font(root, family="Nirmala UI")
+smallFont.config(size=12)
+
+
+font.nametofont("TkHeadingFont").configure(family="Nirmala UI", weight="bold")
 
 
 
-color_boton = "#FFC174"
-
-#/----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------/
-
-titlebar = Frame(root, width=720, height=20, bg="white", bd=3, relief="raised")
-titlebar.bind("<B1-Motion>", move_window)
-titlebar.bind("<B1-ButtonRelease>", reset_mouse_pos)
-
-text_titlebar = Label(titlebar, text="KeyPlayer Manager")
-text_titlebar.configure(background="white")
-
-text_titlebar.bind("<B1-Motion>", move_window)
-text_titlebar.bind("<B1-ButtonRelease>", reset_mouse_pos)
+mainmenu = Frame(root, background=bg1)
+close_button = Button(root, text=" X ", relief="groove", font=smallFont, bg="#EE5454", command=root.destroy)
+close_button.pack(anchor="ne")
+mainmenu.pack(padx=82, expand=True, anchor="n", after=close_button)
 
 
-close_button = Button(titlebar, text=" X ", foreground="black", background="white", relief="sunken", command=root.destroy, bd=0, activebackground="red")
-close_button.bind("<Enter>", hover_closebutton)
-close_button.bind("<Leave>", unhover_closebutton)
+bienvenida = Label(mainmenu, text="Bienvenido a K.E.Y. player manager", font=bigFont)
+bienvenida.grid(column=1, row=1, columnspan=3, ipady=50)
 
-text_titlebar.grid(column=0, row=0, columnspan=2, padx=300)
-close_button.grid(column=1, row=0, sticky="NES")
-titlebar.pack()
+foto_logo = PhotoImage(file="images/logo_azul.png")
+logo = Label(mainmenu, image=foto_logo)
+logo.grid(column=1, row=2, columnspan=3)
 
+torneo_view = Frame(root, background=bg1)
+set_torneo_main = lambda : set_main(torneo_view)
 
-#/----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------/
+crear_torneo_button = Button(torneo_view, text="Crear Torneo", background=color_boton)
 
-slider = Frame(root,  bg="#3DADFF", bd=1, relief="groove", highlightcolor="#34A1EF")
-interac = Frame(root, bg="white")
-slider.pack(anchor="nw", fill="both", side="left")
-interac.pack(anchor="ne", fill="both", side="right", expand=True)
+torneo_info = GUITable(torneo_view, smallFont,(["id_torneo", "nombre_torneo", "fecha_inicio", "fecha_fin", "estado"], ["ID", "Nombre del Torneo", "Inicio", "Fin", "Estado"]))
+torneo_info.configure_width_columns(30, 150, 100, 100, 100)
+torneo_info.insert_item("1", "Brazil Vs Key", "03/05/2025", "04/05/2025", "Finalizado")
+
+torneo_info.show()
+crear_torneo_button.pack(anchor="nw")
+
+torneo_button = Button(mainmenu, text="Torneo", font=smallFont, relief="groove", bg=color_boton, command=set_torneo_main)
+torneo_button.grid(column=1, row=3, pady=50)
 
 
 
+equipos_view = Frame(root, background=bg1)
+set_equipos_view = lambda : set_main(equipos_view)
 
-#/----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------/
+equipos_info = GUITable(equipos_view, smallFont, (["id_equipo", "nombre_equipo", "numero_jugadores"], ["ID", "Nombre", "Participantes"]))
+equipos_info.configure_width_columns(30, 200, 100)
+equipos_info.insert_item("1", "Equipo XD", "5")
 
+equipos_info.show()
 
-torneo_view = Frame(interac, background="white")
-set_torneo_view = lambda: set_main(torneo_view)
-
-logo_torneo = PhotoImage(file="images/control_logo_mini.png")
-torneos_button = Button(slider, text="TORNEOS", image=logo_torneo, compound="right",
-                        background="#3DADFF", relief="flat", command=set_torneo_view, font="customFont")
-torneos_button.grid(column=0, row=1, sticky="NSEW")
-
-# Botón crear torneo arriba
-agregar_torneo_button = Button(torneo_view, text="Crear", command=crear_torneo)
-agregar_torneo_button.grid(column=0, row=0, pady=10, padx=10, sticky="w")
-
-# Frame para el formulario (todos los campos)
-formulario_frame = Frame(torneo_view, bg="white")
-formulario_frame.grid(row=1, column=0, sticky="nsew", padx=10, pady=(0, 20))
-
-opciones_creacion_torneo = {
-    "Nombre del Torneo:" : "ENTRY", 
-    "Fecha de inicio:" : "ENTRY",
-    "Fecha de fin:" : "ENTRY", 
-    "Tipo de torneo" : "OPTIONMENU", 
-    "Fase inicial del torneo:" : "OPTIONMENU",
-    "Juego:" : "OPTIONMENU"
-}
-
-creacion_torneo_GUI = GUIEntry(formulario_frame, 1, **opciones_creacion_torneo)
-juegos = [x[1] for x in ver_videojuegos()]
-fase_torneo = [x[1] for x in ver_fases()]
-tipo_torneo = [x[1] for x in (("Equipos"), ("En solitario"))]
-creacion_torneo_GUI.load_option_menu("Juego:", juegos)
-creacion_torneo_GUI.load_option_menu("Fase inicial del torneo:", fase_torneo)
-creacion_torneo_GUI.show()
+equipos_button = Button(mainmenu, text="Equipos", font=smallFont, relief="groove", bg=color_boton, command=set_equipos_view)
+equipos_button.grid(column=2, row=3)
 
 
-
-# Frame para la tabla
-tabla_frame = Frame(torneo_view, bg="white")
-tabla_frame.grid(row=2, column=0, sticky="nsew", pady=20, padx=10)
-
-torneo_view.grid_rowconfigure(2, weight=1)
-torneo_view.grid_columnconfigure(0, weight=1)
-
-tabla = ttk.Treeview(tabla_frame, columns=("id_torneo", "nombre_torneo"), show="headings")
-tabla.heading("id_torneo", text="ID")
-tabla.heading("nombre_torneo", text="Nombre del Torneo")
-tabla.column("id_torneo", anchor="center", stretch=True)
-tabla.column("nombre_torneo", anchor="center", stretch=True)
-tabla.pack(fill="both", expand=True)
-
-ver_torneos()
-
-
-#/----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------/
-
-
-jugadores_view = Frame(interac, background="white")
+jugadores_view = Frame(root, background=bg1)
 set_jugadores_view = lambda : set_main(jugadores_view)
 
-logo_jugador = PhotoImage(file="images/jugador_logo_mini.png")
-jugadores_button = Button(slider, text="JUGADORES", image=logo_jugador, compound="right", background="#3DADFF", relief="flat", font="customFont", command=set_jugadores_view)
+jugadores_info = GUITable(jugadores_view, smallFont, (["id_jugador", "nombre_jugador"], ["ID", "Nombre"]))
+jugadores_info.configure_width_columns(30, 200)
+jugadores_info.insert_item("1", "Yair17")
 
-jugadores_texto = ["ID", "JUGADOR", "EDAD", "MÁS INFORAMCION"]
+jugadores_info.show()
 
-info_ver_jugadores =GUIInformation(jugadores_view, jugadores_texto)
-
-info_ver_jugadores.show()
-jugadores_button.grid(column=0, row=3, sticky="NSEW")
-
-#/----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------/
-
-logo_equipo = PhotoImage(file="images/equipo_logo_mini.png")
-equipos_button = Button(slider, text="EQUIPOS", image=logo_equipo, compound="right", background="#3DADFF", relief="flat", font="customFont")
-
-equipos_button.grid(column=0, row=2, sticky="NSEW")
-
-#/----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------/
+jugador_button = Button(mainmenu, text="Jugadores", font=smallFont, relief="groove", bg=color_boton, command=set_jugadores_view)
+jugador_button.grid(column=3, row=3)
 
 
-version = Label(slider, text="version 1.0.9", background="#3DADFF", relief="flat", font="customFont")
-version.grid(column=0, row=4,sticky="SW")
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 root.mainloop()
+#/----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------/
+
