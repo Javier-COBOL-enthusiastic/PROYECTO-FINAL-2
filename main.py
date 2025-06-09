@@ -1,4 +1,5 @@
 """
+
 REGISTRO DE JUGADORES / EQUIPOS
 
 #ID = str (pero para que quede mas bonito y se diferencie ID xD)
@@ -44,6 +45,7 @@ from tkinter import *
 from tkinter import messagebox
 from tkinter import font
 from tkinter import ttk
+from tkinter.scrolledtext import ScrolledText
 
 from torneos_gestion import *
 from torneo import *
@@ -54,29 +56,6 @@ def hover_closebutton(e):
     close_button["background"] = "red3"
 def unhover_closebutton(e):
     close_button["background"] = "white"
-
-mouse_x = -1 
-mouse_y = -1 
-def move_window(e):
-    global mouse_x
-    global mouse_y
-    if(mouse_x == -1 and mouse_y == -1):
-        mouse_x = e.x_root
-        mouse_y = e.y_root
-        return
-    
-    a = list(map(lambda x : int(x), root.winfo_geometry().split("+")[-2:]))    
-    dst_x = (e.x_root - mouse_x) + a[0]
-    dst_y = (e.y_root - mouse_y) + a[1]
-
-    root.geometry(f"+{dst_x}+{dst_y}")
-    mouse_x = e.x_root
-    mouse_y = e.y_root
-
-def reset_mouse_pos(e):
-    global mouse_x
-    global mouse_y
-    mouse_y = mouse_x = -1    
 
 def set_main(who : Frame):
     views = [torneo_view, jugadores_view]
@@ -108,24 +87,55 @@ def crear_torneo():
 
 #/----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------/
 
+mouse_x = -1 
+mouse_y = -1 
+def move_window(e):
+    global mouse_x
+    global mouse_y
+    if(mouse_x == -1 and mouse_y == -1):
+        mouse_x = e.x_root
+        mouse_y = e.y_root
+        return
+    
+    a = list(map(lambda x : int(x), root.winfo_geometry().split("+")[-2:]))    
+    dst_x = (e.x_root - mouse_x) + a[0]
+    dst_y = (e.y_root - mouse_y) + a[1]
+
+    root.geometry(f"+{dst_x}+{dst_y}")
+    mouse_x = e.x_root
+    mouse_y = e.y_root
+
+def reset_mouse_pos(e):
+    global mouse_x
+    global mouse_y
+    mouse_y = mouse_x = -1    
+
+
 def set_main(who : Frame):
-    if(mainmenu.cget("background") == bg1):
+    if(mainmenu.cget("background") == bg1):        
         mainmenu.configure(background=bg2)
-        mainmenu.pack_configure(padx=0, anchor="nw", side="left", fill="y", after=None)
-        close_button.pack_configure(anchor="ne", side="right", expand=True)
+        mainmenu.pack_forget()
+        mainmenu.grid(column=0, row=0, rowspan=2, sticky="NSEW")
+        titlebar.grid(column=1, row=0, sticky="NSEW")
+        # titlebar.pack(after=mainmenu, side="left")
+        # mainmenu.pack_configure(padx=0, anchor="w", side="left", fill="y", after=None)                
+        # close_button.pack_configure(anchor="ne", side="right")
         bienvenida.grid_remove()
         logo.grid_configure(column=0, row=0, pady=30)
-        logo.configure(background=bg2)
+        logo.configure(background=bg2, image=logo_blanco)        
         jugador_button.grid_configure(column=0, row=1, pady=0, sticky="NSEW")
         equipos_button.grid_configure(column=0, row=2, pady=0, sticky="NSEW")
-        torneo_button.grid_configure(column=0, row=3, pady=0, sticky="NSEW")
+        torneo_button.grid_configure(column=0, row=3, pady=0, sticky="NSEW")        
         
 
     views = [torneo_view, jugadores_view, equipos_view]
+    texto = {torneo_view : "Torneos", jugadores_view : "Jugadores", equipos_view : "Equipos"}
+    txt.configure(text=texto[who])
     views.pop(views.index(who))    
     for frame in views:
-        frame.pack_forget()
-    who.pack(side="right")    
+        if(len(frame.grid_info()) != 0):
+            frame.grid_remove()
+    who.grid(column=1, row=1, sticky="NSEW", pady=30)
 
 
 root = Tk()
@@ -134,8 +144,18 @@ root.geometry("680x420+0+0")
 root.resizable(False, False)
 root.overrideredirect(True)
 
+root.grid_rowconfigure(0, weight=0)
+root.grid_rowconfigure(1, weight=1)
+root.grid_columnconfigure(0, weight=0)
+root.grid_columnconfigure(1, weight=1)
+
+
+
+
 bg1 = "#EDEDED"
 bg2 = "#9FACE8"
+bg3 = "white"
+
 
 color_boton = "#688CCA"
 
@@ -143,24 +163,54 @@ bigFont = font.Font(family="Nirmala UI", size=14, weight="bold")
 bigFont.config(size=20)
 
 smallFont = font.Font(root, family="Nirmala UI")
+smallFont_Strong = font.Font(root, family="Nirmala UI", weight="bold")
 smallFont.config(size=12)
 
 
 font.nametofont("TkHeadingFont").configure(family="Nirmala UI", weight="bold")
 
+style = ttk.Style()
+style.configure("Vertical.TSeparator", background="gray")
+style.configure("TSeparator")
 
 
 mainmenu = Frame(root, background=bg1)
-close_button = Button(root, text=" X ", relief="groove", font=smallFont, bg="#EE5454", command=root.destroy)
-close_button.pack(anchor="ne")
-mainmenu.pack(padx=82, expand=True, anchor="n", after=close_button)
+mainmenu.pack(padx=82, expand=True, anchor="n")
 
+titlebar = Frame(root, bg=bg3, height=35, bd=0, relief="ridge")
+titlebar.grid_columnconfigure(0, weight=1)
+
+txt = Label(titlebar, bg=bg3, text="", font=smallFont_Strong)
+txt.grid(column=0, row=0, sticky="W")
+
+
+titlebar.bind("<B1-Motion>", move_window)
+titlebar.bind("<B1-ButtonRelease>", reset_mouse_pos)
+
+
+close_image = PhotoImage(file="images/boton_cerrar_mini.png")
+close_button = Button(titlebar, relief="flat", font=smallFont, image=close_image, command=root.destroy, bd=0)
+close_button.grid(column=1, row=0, sticky="E")
+
+# def k():
+#     tt = Toplevel(root)
+#     tt.overrideredirect(True)
+
+#     tt.geometry("150x150")
+#     tt.configure(bg="red")
+#     label = ScrolledText(tt, background=bg1, font=smallFont)
+#     label.insert("1.0", "HOLA HOLA PRUEBAHOLA HOLA PRUEBAHOLA HOLA PRUEBAHOLA HOLA PRUEBAHOLA HOLA PRUEBAHOLA HOLA PRUEBAHOLA HOLA PRUEBAHOLA HOLA PRUEBAHOLA HOLA PRUEBAHOLA HOLA PRUEBAHOLA HOLA PRUEBAHOLA HOLA PRUEBAHOLA HOLA PRUEBAHOLA HOLA PRUEBA")
+#     label.configure()
+#     boton = Button(tt, text="CERRAR", font=smallFont, command=tt.destroy)
+#     boton.pack()
+#     label.pack()
 
 bienvenida = Label(mainmenu, text="Bienvenido a K.E.Y. player manager", font=bigFont)
 bienvenida.grid(column=1, row=1, columnspan=3, ipady=50)
 
-foto_logo = PhotoImage(file="images/logo_azul.png")
-logo = Label(mainmenu, image=foto_logo)
+logo_azul = PhotoImage(file="images/logo_azul_mini.png")
+logo_blanco = PhotoImage(file="images/logo_blanco_mini.png")
+logo = Label(mainmenu, image=logo_azul)
 logo.grid(column=1, row=2, columnspan=3)
 
 torneo_view = Frame(root, background=bg1)
@@ -170,10 +220,12 @@ crear_torneo_button = Button(torneo_view, text="Crear Torneo", background=color_
 
 torneo_info = GUITable(torneo_view, smallFont,(["id_torneo", "nombre_torneo", "fecha_inicio", "fecha_fin", "estado"], ["ID", "Nombre del Torneo", "Inicio", "Fin", "Estado"]))
 torneo_info.configure_width_columns(30, 150, 100, 100, 100)
-torneo_info.insert_item("1", "Brazil Vs Key", "03/05/2025", "04/05/2025", "Finalizado")
+for x in range(100):
+    torneo_info.insert_item(str(x + 1), "Brazil Vs Key", "03/05/2025", "04/05/2025", "Finalizado")
 
 torneo_info.show()
-crear_torneo_button.pack(anchor="nw")
+
+crear_torneo_button.pack(anchor="n", side="left", padx=55)
 
 torneo_button = Button(mainmenu, text="Torneo", font=smallFont, relief="groove", bg=color_boton, command=set_torneo_main)
 torneo_button.grid(column=1, row=3, pady=50)
@@ -183,11 +235,17 @@ torneo_button.grid(column=1, row=3, pady=50)
 equipos_view = Frame(root, background=bg1)
 set_equipos_view = lambda : set_main(equipos_view)
 
-equipos_info = GUITable(equipos_view, smallFont, (["id_equipo", "nombre_equipo", "numero_jugadores"], ["ID", "Nombre", "Participantes"]))
-equipos_info.configure_width_columns(30, 200, 100)
-equipos_info.insert_item("1", "Equipo XD", "5")
+ops = {"ID":"LABEL", "NOMBRE":"LABEL", "PARTICIPANTES":"LABEL"}
+prueba = GUITableCustom(equipos_view, smallFont, **ops)
 
-equipos_info.show()
+prueba.show()
+
+# equipos_info = GUITable(equipos_view, smallFont, (["id_equipo", "nombre_equipo", "numero_jugadores"], ["ID", "Nombre", "Participantes"]))
+
+# equipos_info.configure_width_columns(30, 200, 100)
+# equipos_info.insert_item("1", "Equipo XD", "5")
+
+# equipos_info.show()
 
 equipos_button = Button(mainmenu, text="Equipos", font=smallFont, relief="groove", bg=color_boton, command=set_equipos_view)
 equipos_button.grid(column=2, row=3)
