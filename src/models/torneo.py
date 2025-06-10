@@ -1,6 +1,6 @@
 from datetime import datetime
 import re
-from Elements import GUIEntry
+from ui.elements import GUIEntry
 
 class NombreInvalido(Exception):
     def __init__(self):
