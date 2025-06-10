@@ -1,3 +1,1 @@
 mysql-connector-python
-# Tkinter viene incluido en la mayoría de instalaciones de Python, pero si es necesario:
-tk 
