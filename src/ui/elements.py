@@ -3,183 +3,68 @@ from tkinter import ttk
 from tkinter import Canvas
 
 
-#         self.vars = []
-#         self.widgets = []
-#         self.text = []
+def draw_rounded_rect(canvas, x1, y1, x2, y2, r, fill, outline, width=1):
+    # Arcos de las esquinas
+    canvas.create_arc(
+        x1,
+        y1,
+        x1 + 2 * r,
+        y1 + 2 * r,
+        start=90,
+        extent=90,
+        style="pieslice",
+        fill=fill,
+        outline=outline,
+        width=width,
+    )
+    canvas.create_arc(
+        x2 - 2 * r,
+        y1,
+        x2,
+        y1 + 2 * r,
+        start=0,
+        extent=90,
+        style="pieslice",
+        fill=fill,
+        outline=outline,
+        width=width,
+    )
+    canvas.create_arc(
+        x2 - 2 * r,
+        y2 - 2 * r,
+        x2,
+        y2,
+        start=270,
+        extent=90,
+        style="pieslice",
+        fill=fill,
+        outline=outline,
+        width=width,
+    )
+    canvas.create_arc(
+        x1,
+        y2 - 2 * r,
+        x1 + 2 * r,
+        y2,
+        start=180,
+        extent=90,
+        style="pieslice",
+        fill=fill,
+        outline=outline,
+        width=width,
+    )
 
-#         color = root.cget("background")
-
-#         for name, type in self.data.items():
-#             self.vars.append(StringVar())
-#             match type:
-#                 case "ENTRY":
-#                     wid = Entry(
-#                         self.root,
-#                         textvariable=self.vars[-1],
-#                         background=color,
-#                         font=self.font,
-#                     )
-#                 case "OPTIONMENU":
-#                     wid = OptionMenu(self.root, variable=self.vars[-1], value="")
-#                     wid.configure(font=self.font)
-#                     self.vars[-1].set("(...)")
-#             texto = Label(self.root, text=name, background=color, font=self.font)
-#             self.widgets.append(wid)
-#             self.text.append(texto)
-
-#     def show(self):
-#         for x in range(len(self.widgets)):
-#             self.text[x].grid(column=0, row=self.row_pad)
-#             if type(self.widgets[x]) == tuple:
-#                 self.widgets[x][0].grid(column=1, row=self.row_pad)
-#             else:
-#                 self.widgets[x].grid(column=1, row=self.row_pad)
-#             self.row_pad += 1
-
-#     def hide(self):
-#         for x in range(len(self.widgets)):
-#             self.text[x].grid_remove()
-#             if type(self.widgets[x]) == tuple:
-#                 self.widgets[x][0].grid_remove()
-#             else:
-#                 self.widgets[x].grid_remove()
-#             self.row_pad -= 1
-
-#     def load_option_menu(self, name, data):
-#         n = 0
-#         for x in self.data.keys():
-#             if x == name and self.data[x] == "OPTIONMENU":
-#                 self.vars[n].set("(...)")
-#                 self.widgets[n][0]["menu"].delete(0, "end")
-#                 for y in data:
-#                     self.widgets[n][0]["menu"].add_command(
-#                         label=y, command=lambda v=y: self.vars[n].set(v)
-#                     )
-#                 break
-#             n += 1
-
-#     def clear(self):
-#         for var in self.vars:
-#             var.set("")
-
-#     def get(self) -> list:
-#         n = []
-#         for x in self.vars:
-#             n.append(x.get())
-
-#         return n
-
-#     def get_current_row_pad(self):
-#         return self.row_pad
-
-
-# class GUITable:
-#     def __handle_click__(self, event):
-#         if self.table.identify_region(event.x, event.y) == "separator":
-#             return "break"
-
-#     def __init__(self, root, font, keys: tuple):
-#         self.root = root
-#         self.keys = keys
-#         self.font = font
-
-#         self.table = ttk.Treeview(
-#             self.root, selectmode="none", columns=self.keys[0], show="headings"
-#         )
-#         self.table.configure(selectmode="browse")
-#         self.table.bind("<Button-1>", self.__handle_click__)
-
-#         for c in range(len(self.keys[0])):
-#             self.table.heading(self.keys[0][c], text=self.keys[1][c], anchor="center")
-#             self.table.column(self.keys[0][c], anchor="center", stretch=False)
-
-#         self.shown = False
-
-#     def insert_item(self, *info):
-#         self.table.insert(parent="", index="end", values=info)
-
-#     def configure_width_columns(self, *config):
-#         for c in range(len(self.keys[0])):
-#             self.table.column(self.keys[0][c], width=config[c])
-
-#     def show(self):
-#         if not self.shown:
-#             self.shown = True
-#             self.table.pack(anchor="s", expand=False)
-
-#     def hide(self):
-#         if self.shown:
-#             self.table.pack_forget()
-
-#     def add_elements(self, *elements):
-#         for elem in elements:
-#             pass
-
-
-# class GUITableCustom:
-#     def __init__(self, root, font, **keys_type):
-#         self.root = root
-#         self.font = font
-
-#         self.bg = "white"
-#         self.table = Frame(
-#             self.root, bg=self.bg, bd=1, relief="solid", highlightcolor="gray"
-#         )
-
-#         self.keys_type = keys_type
-
-#         self.widgets = []
-#         n = 0
-#         for key, type in self.keys_type.items():
-#             sep = ttk.Separator(self.table, orient="vertical")
-
-#             match type:
-#                 case "LABEL":
-#                     wid = Label(
-#                         self.table,
-#                         text=key,
-#                         bg=self.bg,
-#                         font=self.font,
-#                         justify="center",
-#                     )
-#                 case "BUTTON":
-#                     wid = Button(
-#                         self.table,
-#                         text=key,
-#                         bg=self.bg,
-#                         relief="sunken",
-#                         font=self.font,
-#                     )
-
-#             wid.grid(column=n, row=0)
-#             sep.grid(padx=10, column=n + 1, row=0, sticky="NSEW")
-#             n += 2
-#             self.widgets.append(wid)
-#             self.widgets.append(sep)
-
-#         self.widgets[-1].grid_remove()
-#         self.widgets.pop()
-#         self.shown = False
-
-#     def insert_elements(self, *elements):
-#         for c in range(len(elements)):
-#             if self.widgets[c].winfo_class() != "Button":
-#                 n = self.widgets[c].cget("text") + elements[c]
-#                 self.widgets[c].configure(text=n)
-#             else:
-#                 pass
-
-#     def insert_elemnt(self, key, element):
-#         pass
-
-#     def show(self):
-#         if not self.shown:
-#             self.shown = True
-#             self.table.pack(anchor="s", expand=False)
-
-#     def hide(self):
-#         if self.shown:
-#             self.table.pack_forget()
+    # Rectángulo central
+    canvas.create_rectangle(
+        x1 + r, y1, x2 - r, y2, fill=fill, outline=outline, width=width
+    )
+    # Rectángulos laterales
+    canvas.create_rectangle(
+        x1, y1 + r, x1 + r, y2 - r, fill=fill, outline=outline, width=width
+    )
+    canvas.create_rectangle(
+        x2 - r, y1 + r, x2, y2 - r, fill=fill, outline=outline, width=width
+    )
 
 
 class MenuButton(Button):
@@ -368,9 +253,14 @@ class TableView(Frame):
         count=None,
         col_widths=None,
         action_text="Ver",
+        anchor_cols="w",
+        button_text=None,
+        button_command=None,
+        card_w=980,
+        card_h=350,
         **kwargs,
     ):
-        super().__init__(parent, bg="#F6F6F6", **kwargs)
+        super().__init__(parent, bg="#EDEDED", **kwargs)
         self.headers = headers
         self.data = data
         self.actions = actions or []
@@ -379,25 +269,106 @@ class TableView(Frame):
         self.count = count
         self.col_widths = col_widths or [140] * len(headers)
         self.action_text = action_text
+        self.anchor_cols = anchor_cols
+        self.button_text = button_text
+        self.button_command = button_command
+        self.card_w = card_w
+        self.card_h = card_h
         self._build_table()
 
     def _build_table(self):
-        card = Frame(self, bg="white", bd=0, highlightthickness=0)
+        card_w, card_h = self.card_w, self.card_h
+        card = Frame(self, bg="#EDEDED", width=card_w, height=card_h)
         card.pack(padx=0, pady=0, fill="both", expand=True)
-
-        if self.title or self.count is not None:
-            title_row = Frame(card, bg="white")
-            title_row.pack(fill="x", padx=24, pady=(18, 0))
+        card.pack_propagate(False)
+        canvas = Canvas(
+            card,
+            width=card_w,
+            height=card_h,
+            bg="#EDEDED",
+            highlightthickness=0,
+        )
+        canvas.pack(fill="both", expand=True)
+        draw_rounded_rect(
+            canvas, 0, 0, card_w, card_h, 18, fill="white", outline="white"
+        )
+        card_content = Frame(canvas, bg="white")
+        card_content.place(x=0, y=0, width=card_w, height=card_h)
+        # Header con título, pill y botón
+        if self.title or self.count is not None or self.button_text:
+            title_row = Frame(card_content, bg="white")
+            title_row.pack(fill="x", padx=32, pady=(24, 0))
             if self.title:
                 Label(
                     title_row,
                     text=self.title,
-                    font=("Consolas", 16, "bold"),
+                    font=("Consolas", 20, "bold"),
                     bg="white",
-                    anchor="w",
+                    fg="#222",
                 ).pack(side="left")
+            if self.count is not None:
+                pill_w, pill_h, radius = 110, 28, 18
+                pill = Canvas(
+                    title_row,
+                    width=pill_w,
+                    height=pill_h,
+                    bg="white",
+                    highlightthickness=0,
+                    bd=0,
+                )
+                pill.pack(side="left", padx=(16, 0))
 
-        header_row = Frame(card, bg="white")
+                def rounded_rect(canvas, x1, y1, x2, y2, r, **kwargs):
+                    points = [
+                        (x1 + r, y1),
+                        (x2 - r, y1),
+                        (x2, y1),
+                        (x2, y1 + r),
+                        (x2, y2 - r),
+                        (x2, y2),
+                        (x2 - r, y2),
+                        (x1 + r, y2),
+                        (x1, y2),
+                        (x1, y2 - r),
+                        (x1, y1 + r),
+                        (x1, y1),
+                    ]
+                    return canvas.create_polygon(points, smooth=True, **kwargs)
+
+                rounded_rect(
+                    pill,
+                    1,
+                    1,
+                    pill_w - 2,
+                    pill_h - 2,
+                    radius,
+                    fill="#E0E0E0",
+                    outline="#E0E0E0",
+                )
+                pill.create_text(
+                    pill_w // 2,
+                    pill_h // 2,
+                    text=f"{self.count} Existentes",
+                    font=("Consolas", 10, "bold"),
+                    fill="#888",
+                )
+            if self.button_text:
+                from ui.elements import RoundedButton
+
+                RoundedButton(
+                    title_row,
+                    text=self.button_text,
+                    width=180,
+                    height=48,
+                    radius=18,
+                    font=("Consolas", 14, "bold"),
+                    command=self.button_command,
+                ).pack(side="right", padx=(0, 50))
+        # Tabla
+        table_frame = Frame(card_content, bg="white")
+        table_frame.pack(padx=0, pady=(10, 0), fill="both", expand=True)
+        # Header de la tabla
+        header_row = Frame(table_frame, bg="white")
         header_row.pack(fill="x", padx=0, pady=(6, 0))
         for i, h in enumerate(self.headers):
             Label(
@@ -406,22 +377,20 @@ class TableView(Frame):
                 font=("Consolas", 12, "bold"),
                 bg="white",
                 fg="#222",
-                anchor="w",
+                anchor=self.anchor_cols,
                 width=int(self.col_widths[i] // 10),
                 pady=12,
                 padx=0,
             ).grid(
                 row=0, column=i, sticky="nsew", padx=(24 if i == 0 else 8, 0), pady=0
             )
-
-        table_canvas = Canvas(card, bg="white", highlightthickness=0, height=320)
+        table_canvas = Canvas(table_frame, bg="white", highlightthickness=0, height=320)
         table_canvas.pack(fill="both", expand=True, side="left")
-
-        scrollbar = Scrollbar(card, orient="vertical", command=table_canvas.yview)
+        scrollbar = Scrollbar(
+            table_frame, orient="vertical", command=table_canvas.yview
+        )
         scrollbar.pack(side="right", fill="y")
-
         table_canvas.configure(yscrollcommand=scrollbar.set)
-
         rows_frame = Frame(table_canvas, bg="white")
         window_id = table_canvas.create_window((0, 0), window=rows_frame, anchor="nw")
 
@@ -432,12 +401,10 @@ class TableView(Frame):
         rows_frame.bind("<Configure>", on_configure)
         table_canvas.bind("<Configure>", on_configure)
 
-        # Habilitar scroll con mouse
         def _on_mousewheel(event):
             table_canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
 
         table_canvas.bind_all("<MouseWheel>", _on_mousewheel)
-
         for r, row in enumerate(self.data):
             row_bg = "#EEEEEE" if r % 2 == 1 else "white"
             row_frame = Frame(rows_frame, bg=row_bg)

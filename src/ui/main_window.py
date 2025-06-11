@@ -29,13 +29,16 @@ class MainWindow:
             widget.destroy()
 
     def show_sidebar(self, active):
-        self.sidebar = Frame(self.root, bg=SIDEBAR_COLOR, width=250)
+        self.sidebar = Frame(
+            self.root,
+            bg=SIDEBAR_COLOR,
+        )
         self.sidebar.pack(side="left", fill="y")
         logo_path = os.path.join("assets", "images", "logo_side_bar.png")
         logo_img = PhotoImage(file=logo_path)
         logo_label = Label(self.sidebar, image=logo_img, bg=SIDEBAR_COLOR)
         logo_label.image = logo_img
-        logo_label.pack(pady=(40, 40))
+        logo_label.pack(pady=(40, 20))
         menu_items = [
             ("Inicio", lambda: self.show_view("welcome")),
             ("Torneo", lambda: self.show_view("torneo")),
@@ -49,8 +52,8 @@ class MainWindow:
             btn = RoundedButton(
                 self.sidebar,
                 name,
-                width=160,
-                height=40,
+                width=200,
+                height=60,
                 radius=18,
                 bg=btn_bg,
                 fg=btn_fg,
