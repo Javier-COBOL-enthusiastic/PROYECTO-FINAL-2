@@ -1,6 +1,8 @@
 from tkinter import *
 from tkinter import ttk
 from tkinter import Canvas
+from tkinter import PhotoImage
+import os
 
 
 def draw_rounded_rect(canvas, x1, y1, x2, y2, r, fill, outline, width=1):
@@ -134,9 +136,9 @@ class RoundedButton(Canvas):
         self.tag_bind(self.btn_id, "<Leave>", self._on_leave)
         self.tag_bind(self.text_id, "<Enter>", self._on_enter)
         self.tag_bind(self.text_id, "<Leave>", self._on_leave)
-        self.bind("<Button-1>", self._on_click)
-        self.tag_bind(self.btn_id, "<Button-1>", self._on_click)
-        self.tag_bind(self.text_id, "<Button-1>", self._on_click)
+        self.bind("<ButtonRelease-1>", self._on_click)
+        self.tag_bind(self.btn_id, "<ButtonRelease-1>", self._on_click)
+        self.tag_bind(self.text_id, "<ButtonRelease-1>", self._on_click)
 
     def _draw_rounded_rect(self, x1, y1, x2, y2, r, **kwargs):
         points = [
@@ -179,18 +181,32 @@ class RoundedButton(Canvas):
 
     def _animate_color(self, from_color, to_color, steps=8, step=0):
         def hex_to_rgb(h):
-            if h.startswith("#"):
-                return tuple(int(h[i : i + 2], 16) for i in (1, 3, 5))
-            # Si es un nombre de color, conviértelo usando winfo_rgb
+            if not isinstance(h, str) or not h.startswith("#") or len(h) != 7:
+                # Si no es un color hex válido, regresa color blanco o el bg
+                return (255, 255, 255)
             try:
-                r, g, b = self.winfo_rgb(h)
-                return (r // 256, g // 256, b // 256)
+                return tuple(int(h[i : i + 2], 16) for i in (1, 3, 5))
             except Exception:
-                return (255, 255, 255)  # fallback blanco
+                return (255, 255, 255)
 
         def rgb_to_hex(rgb):
             return "#%02x%02x%02x" % rgb
 
+        # Si el color no es válido, no animar
+        if not (
+            isinstance(from_color, str)
+            and from_color.startswith("#")
+            and len(from_color) == 7
+        ):
+            self.itemconfig(self.btn_id, fill=self.bg)
+            return
+        if not (
+            isinstance(to_color, str)
+            and to_color.startswith("#")
+            and len(to_color) == 7
+        ):
+            self.itemconfig(self.btn_id, fill=self.bg)
+            return
         start = hex_to_rgb(from_color)
         end = hex_to_rgb(to_color)
         new_rgb = tuple(
@@ -204,6 +220,19 @@ class RoundedButton(Canvas):
                     rgb_to_hex(new_rgb), to_color, steps, step + 1
                 ),
             )
+
+    def set_text(self, text):
+        self.itemconfig(self.text_id, text=text)
+
+    def set_colors(self, bg=None, fg=None, hover_bg=None):
+        if bg:
+            self.bg = bg
+            self.itemconfig(self.btn_id, fill=bg)
+        if fg:
+            self.fg = fg
+            self.itemconfig(self.text_id, fill=fg)
+        if hover_bg:
+            self.hover_bg = hover_bg
 
 
 class TableActionButton(Canvas):
@@ -433,3 +462,271 @@ class TableView(Frame):
                 for action in self.actions:
                     btn = action(row, action_frame, self.action_text)
                     btn.pack(side="left", padx=4)
+
+
+class StyledEntry(Frame):
+    def __init__(
+        self,
+        parent,
+        textvariable=None,
+        width=32,
+        font=("Consolas", 13),
+        placeholder="",
+        border_radius=12,
+        **kwargs,
+    ):
+        super().__init__(parent, bg="white")
+        self.border_radius = border_radius
+        self.canvas = Canvas(
+            self, bg="white", highlightthickness=0, width=400, height=48
+        )
+        self.canvas.pack(fill="x", expand=True)
+        self._draw_rounded_rect(
+            6, 6, 394, 42, border_radius, fill="#F6F6F6", outline="#D5D4DC"
+        )
+        self.entry = Entry(
+            self,
+            textvariable=textvariable,
+            font=font,
+            bd=0,
+            relief="flat",
+            highlightthickness=0,
+            bg="#F6F6F6",
+            fg="#222",
+            **kwargs,
+        )
+        self.entry.place(x=18, y=14, width=360, height=26)
+        self.config(
+            highlightbackground="#D5D4DC",
+            highlightcolor="#688CCA",
+            highlightthickness=0,
+            bd=0,
+        )
+        self.entry.bind("<FocusIn>", self._on_focus_in)
+        self.entry.bind("<FocusOut>", self._on_focus_out)
+        self.placeholder = placeholder
+        self.textvariable = textvariable
+        if placeholder and (not textvariable or not textvariable.get()):
+            self._set_placeholder()
+        self.entry.bind("<FocusIn>", self._clear_placeholder)
+        self.entry.bind("<FocusOut>", self._restore_placeholder)
+
+    def _draw_rounded_rect(self, x1, y1, x2, y2, r, **kwargs):
+        points = [
+            x1 + r,
+            y1,
+            x2 - r,
+            y1,
+            x2,
+            y1,
+            x2,
+            y1 + r,
+            x2,
+            y2 - r,
+            x2,
+            y2,
+            x2 - r,
+            y2,
+            x1 + r,
+            y2,
+            x1,
+            y2,
+            x1,
+            y2 - r,
+            x1,
+            y1 + r,
+            x1,
+            y1,
+        ]
+        return self.canvas.create_polygon(points, smooth=True, **kwargs)
+
+    def _on_focus_in(self, event):
+        self.canvas.itemconfig(1, outline="#688CCA")
+
+    def _on_focus_out(self, event):
+        self.canvas.itemconfig(1, outline="#D5D4DC")
+
+    def _set_placeholder(self, event=None):
+        self.entry.delete(0, "end")
+        self.entry.insert(0, self.placeholder)
+        self.entry.config(fg="#888")
+
+    def _clear_placeholder(self, event=None):
+        if self.entry.get() == self.placeholder:
+            self.entry.delete(0, "end")
+            self.entry.config(fg="#222")
+
+    def _restore_placeholder(self, event=None):
+        if not self.entry.get():
+            self._set_placeholder()
+
+    def get(self):
+        val = self.entry.get()
+        if val == self.placeholder:
+            return ""
+        return val
+
+    def set(self, value):
+        self.entry.delete(0, "end")
+        self.entry.insert(0, value)
+
+
+class AlertDialog(Frame):
+    _instance = None  # Singleton para evitar múltiples diálogos
+
+    def __init__(self, parent, message, success=True, on_close=None):
+        from ui.elements import RoundedButton
+
+        if AlertDialog._instance is not None:
+            try:
+                AlertDialog._instance.destroy()
+            except Exception:
+                pass
+        AlertDialog._instance = self
+
+        super().__init__(parent, bg="#000000")
+        self.place(relx=0, rely=0, relwidth=1, relheight=1)
+        self.lift()
+
+        # Fondo semitransparente
+        self.overlay = Canvas(self, bg="#000000", highlightthickness=0)
+        self.overlay.place(relx=0, rely=0, relwidth=1, relheight=1)
+        self.update_idletasks()
+        w = self.winfo_width()
+        h = self.winfo_height()
+        self.overlay.create_rectangle(0, 0, w, h, fill="#E0E0E0")
+
+        # Card centrada
+        card_w, card_h, card_r = 600, 400, 24
+        card = Frame(self, bg="white", width=card_w, height=card_h)
+        card.place(relx=0.5, rely=0.5, anchor="center")
+        card.pack_propagate(False)
+
+        # Icono
+        assets_path = os.path.join(os.path.dirname(__file__), "..", "assets", "images")
+        icon_path = os.path.join(assets_path, "success.png" if success else "error.png")
+        icon_img = PhotoImage(file=icon_path, format="png")
+        Label(card, image=icon_img, bg="white").pack(pady=(40, 0))
+        self.icon_img = icon_img
+
+        # Mensaje
+        msg_lbl = Label(
+            card,
+            text=message,
+            font=("Consolas", 22, "bold"),
+            fg="#222",
+            bg="white",
+            wraplength=520,
+            justify="center",
+        )
+        msg_lbl.pack(pady=(18, 0), padx=24)
+
+        def accept():
+            AlertDialog._instance = None
+            self.destroy()
+            if on_close:
+                on_close()
+
+        # Botón de aceptar
+        btn_frame = Frame(card, bg="white")
+        btn_frame.pack(pady=(32, 0))
+        RoundedButton(
+            btn_frame,
+            text="Aceptar",
+            width=220,
+            height=56,
+            radius=22,
+            font=("Consolas", 16, "bold"),
+            bg="#688CCA" if success else "#E57373",
+            fg="white",
+            hover_bg="#4B6EA8" if success else "#C62828",
+            command=accept,
+        ).pack(side="left", padx=12)
+
+        self.focus_set()
+        self.bind("<Button-1>", lambda e: None)  # Captura clicks para evitar que pasen atrás
+
+
+class ConfirmDialog(Frame):
+    def __init__(
+        self, parent, message, on_confirm=None, on_cancel=None, card_height=None
+    ):
+        from ui.elements import RoundedButton
+
+        super().__init__(parent, bg="#000000")
+        self.place(relx=0, rely=0, relwidth=1, relheight=1)
+        self.lift()
+
+        # Fondo semitransparente
+        self.overlay = Canvas(self, bg="#000000", highlightthickness=0)
+        self.overlay.place(relx=0, rely=0, relwidth=1, relheight=1)
+        self.update_idletasks()
+        w = self.winfo_width()
+        h = self.winfo_height()
+        self.overlay.create_rectangle(0, 0, w, h, fill="#E0E0E0")
+
+        # Card centrada
+        card_w, card_r = 800, 32
+        card_h = card_height if card_height is not None else 400
+        card = Frame(self, bg="white", width=card_w, height=card_h)
+        card.place(relx=0.5, rely=0.5, anchor="center")
+        card.pack_propagate(False)
+
+        # Icono
+        assets_path = os.path.join(os.path.dirname(__file__), "..", "assets", "images")
+        icon_path = os.path.join(assets_path, "error.png")
+        icon_img = PhotoImage(file=icon_path, format="png")
+        Label(card, image=icon_img, bg="white").pack(pady=(40, 0))
+        self.icon_img = icon_img
+
+        # Mensaje
+        msg_lbl = Label(
+            card,
+            text=message,
+            font=("Consolas", 26, "bold"),
+            fg="#222",
+            bg="white",
+            wraplength=700,
+            justify="center",
+        )
+        msg_lbl.pack(pady=(24, 0), padx=32)
+        btn_frame = Frame(card, bg="white")
+        btn_frame.pack(pady=(48, 0))
+
+        def confirm():
+            self.destroy()
+            if on_confirm:
+                on_confirm()
+
+        def cancel():
+            self.destroy()
+            if on_cancel:
+                on_cancel()
+
+        RoundedButton(
+            btn_frame,
+            text="Cancelar",
+            width=220,
+            height=56,
+            radius=22,
+            font=("Consolas", 16, "bold"),
+            bg="#EEE",
+            fg="#222",
+            hover_bg="#DDD",
+            command=cancel,
+        ).pack(side="left", padx=36)
+        RoundedButton(
+            btn_frame,
+            text="Eliminar",
+            width=220,
+            height=56,
+            radius=22,
+            font=("Consolas", 16, "bold"),
+            bg="#E57373",
+            fg="white",
+            hover_bg="#C62828",
+            command=confirm,
+        ).pack(side="left", padx=36)
+
+        self.focus_set()
+        self.bind("<Button-1>", lambda e: None)  # Captura clicks para evitar que pasen atrás

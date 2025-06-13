@@ -1,10 +1,16 @@
 from tkinter import *
 from ui.elements import TableView, TableActionButton, RoundedButton
-import os
 
 
 class JugadoresView:
-    def __init__(self, parent):
+    def __init__(
+        self,
+        parent,
+        on_crear_jugador=None,
+        on_editar_jugador=None,
+        on_eliminar_jugador=None,
+        jugadores=None,
+    ):
         frame = Frame(parent, bg="#EDEDED")
         frame.place(relx=0, rely=0, relwidth=1, relheight=1)
 
@@ -33,7 +39,7 @@ class JugadoresView:
         )
 
         headers = ["ID", "Nombre", "Acciones", ""]
-        data = [[f"{i:02}", "John Hernest John Hernest"] for i in range(1, 10)]
+        data = [[j["id"], j["nombre"]] for j in (jugadores or [])]
 
         def info_button(row, parent, text):
             btn = RoundedButton(
@@ -56,12 +62,16 @@ class JugadoresView:
             TableActionButton(
                 btn_frame,
                 icon_path="assets/images/delete.png",
-                command=lambda: print(f"Eliminar jugador {row[1]}"),
+                command=lambda: (
+                    on_eliminar_jugador(row[0]) if on_eliminar_jugador else None
+                ),
             ).pack(side="left", padx=(0, 8))
             TableActionButton(
                 btn_frame,
                 icon_path="assets/images/edit.png",
-                command=lambda: print(f"Editar jugador {row[1]}"),
+                command=lambda: (
+                    on_editar_jugador(row[0]) if on_editar_jugador else None
+                ),
             ).pack(side="left", padx=(0, 8))
             return btn_frame
 
@@ -75,7 +85,7 @@ class JugadoresView:
             title="Lista de jugadores",
             count=len(data),
             button_text="Crear jugador",
-            button_command=lambda: print("Crear jugador"),
+            button_command=on_crear_jugador,
             card_w=table_card_w,
             card_h=table_card_h,
             col_widths=col_widths,

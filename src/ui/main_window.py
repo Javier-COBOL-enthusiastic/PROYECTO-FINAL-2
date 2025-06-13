@@ -1,10 +1,14 @@
 from tkinter import *
 import os
-from ui.elements import RoundedButton
+from ui.elements import RoundedButton, AlertDialog, ConfirmDialog
 from ui.views.welcome import WelcomeView
 from ui.views.torneo import TorneoView
 from ui.views.equipo import EquipoView
-from ui.views.jugadores import JugadoresView
+from ui.views.jugadores import JugadoresView, JugadorFormView
+import sys
+
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "mocks"))
+from ui.mocks import get_jugadores, create_jugador, update_jugador, delete_jugador
 
 WINDOW_WIDTH = 1200
 WINDOW_HEIGHT = 800
@@ -63,7 +67,14 @@ class MainWindow:
             )
             btn.pack(pady=8)
 
-    def show_view(self, view_name):
+    def show_alert(self, parent, message, success=True, next_view=None):
+        def go_next():
+            if next_view:
+                self.show_view(next_view)
+
+        AlertDialog(parent, message, success=success, on_close=go_next)
+
+    def show_view(self, view_name, jugador_id=None):
         self.clear_main()
         if view_name != "welcome":
             self.show_sidebar(view_name)
@@ -78,7 +89,113 @@ class MainWindow:
         elif view_name == "equipo":
             EquipoView(main_frame)
         elif view_name == "jugadores":
-            JugadoresView(main_frame)
+            jugadores = get_jugadores()
+
+            def on_eliminar_jugador(jugador_id):
+                def do_delete():
+                    delete_jugador(jugador_id)
+                    self.show_view(
+                        "jugadores"
+                    )  # Solo recarga la vista, no muestra dialog extra
+
+                ConfirmDialog(
+                    self.root,
+                    "¿Estás seguro que deseas eliminar este jugador?",
+                    on_confirm=do_delete,
+                    on_cancel=None,
+                )
+
+            JugadoresView(
+                main_frame,
+                on_crear_jugador=lambda: self.show_view("jugador_form"),
+                on_editar_jugador=lambda jugador_id: self.show_view(
+                    "jugador_form", jugador_id=jugador_id
+                ),
+                on_eliminar_jugador=on_eliminar_jugador,
+                jugadores=jugadores,
+            )
+        elif view_name == "jugador_form":
+            jugadores = get_jugadores()
+            jugador = None
+            if jugador_id is not None:
+                jugador = next((j for j in jugadores if j["id"] == jugador_id), None)
+
+            def crear_jugador(nombre):
+                nombre = nombre.strip()
+                if not nombre or nombre == "" or nombre == "Nombre del jugador...":
+                    self.show_alert(
+                        self.root, "El nombre no puede estar vacío", success=False
+                    )
+                    return
+                nombre_lower = nombre.lower()
+                for j in jugadores:
+                    if j["nombre"].lower() == nombre_lower:
+                        self.show_alert(
+                            self.root,
+                            "Ya existe un jugador con ese nombre",
+                            success=False,
+                        )
+                        return
+                try:
+                    create_jugador(nombre)
+                    self.show_alert(
+                        self.root,
+                        "Dato agregado exitosamente",
+                        success=True,
+                        next_view="jugadores",
+                    )
+                except Exception as e:
+                    self.show_alert(
+                        self.root,
+                        "Ha ocurrido un error",
+                        success=False,
+                        next_view="jugadores",
+                    )
+
+            def actualizar_jugador(nombre, id):
+                nombre = nombre.strip()
+                if not nombre:
+                    self.show_alert(
+                        self.root, "El nombre no puede estar vacío", success=False
+                    )
+                    return
+                nombre_lower = nombre.lower()
+                for j in jugadores:
+                    if j["nombre"].lower() == nombre_lower and j["id"] != id:
+                        self.show_alert(
+                            self.root,
+                            "Ya existe un jugador con ese nombre",
+                            success=False,
+                        )
+                        return
+                try:
+                    update_jugador(id, nombre)
+                    self.show_alert(
+                        self.root,
+                        "Dato actualizado exitosamente",
+                        success=True,
+                        next_view="jugadores",
+                    )
+                except Exception as e:
+                    self.show_alert(
+                        self.root,
+                        "Ha ocurrido un error",
+                        success=False,
+                        next_view="jugadores",
+                    )
+
+            def on_save(nombre, id, is_editing):
+                if is_editing:
+                    actualizar_jugador(nombre, id)
+                else:
+                    crear_jugador(nombre)
+
+            JugadorFormView(
+                main_frame,
+                on_save=lambda nombre, id: on_save(nombre, id, jugador_id is not None),
+                initial_name=jugador["nombre"] if jugador else "",
+                jugador_id=jugador_id,
+            )
 
     def run(self):
         self.root.mainloop()

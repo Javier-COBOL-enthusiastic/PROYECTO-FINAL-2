@@ -1,0 +1,38 @@
+[
+    {
+        "id": 1,
+        "nombre": "Familia Krieg",
+        "jugadores": [
+            {
+                "id_jugador": 20,
+                "es_lider": false
+            },
+            {
+                "id_jugador": 21,
+                "es_lider": true
+            }
+        ]
+    },
+    {
+        "id": 2,
+        "nombre": "Test 2",
+        "jugadores": [
+            {
+                "id_jugador": 1,
+                "es_lider": true
+            },
+            {
+                "id_jugador": 20,
+                "es_lider": false
+            },
+            {
+                "id_jugador": 22,
+                "es_lider": false
+            },
+            {
+                "id_jugador": 23,
+                "es_lider": false
+            }
+        ]
+    }
+]
