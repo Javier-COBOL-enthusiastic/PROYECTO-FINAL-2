@@ -1,30 +1,38 @@
 [
     {
         "id": 1,
-        "nombre": "Juan Perez"
-    },
-    {
-        "id": 20,
-        "nombre": "Francisco Krieg"
-    },
-    {
-        "id": 21,
-        "nombre": "Lucy Krieg"
-    },
-    {
-        "id": 22,
-        "nombre": "Levi"
+        "nombre": "Kirby"
     },
     {
         "id": 23,
-        "nombre": "Fabi Guerra Krieg"
+        "nombre": "Lucy"
     },
     {
-        "id": 24,
-        "nombre": "Norberto"
+        "id": 26,
+        "nombre": "Emely"
     },
     {
-        "id": 25,
-        "nombre": "El Calvo 2"
+        "id": 27,
+        "nombre": "Emilico"
+    },
+    {
+        "id": 28,
+        "nombre": "Mao mao"
+    },
+    {
+        "id": 29,
+        "nombre": "Loulan"
+    },
+    {
+        "id": 30,
+        "nombre": "Monica"
+    },
+    {
+        "id": 31,
+        "nombre": "Albedo"
+    },
+    {
+        "id": 32,
+        "nombre": "Yair17"
     }
 ]

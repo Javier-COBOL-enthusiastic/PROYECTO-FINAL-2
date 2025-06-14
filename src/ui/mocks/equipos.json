@@ -1,36 +1,44 @@
 [
     {
         "id": 1,
-        "nombre": "Familia Krieg",
+        "nombre": "Equipo test",
         "jugadores": [
             {
-                "id_jugador": 20,
+                "id_jugador": 1,
                 "es_lider": false
             },
             {
-                "id_jugador": 21,
+                "id_jugador": 27,
+                "es_lider": false
+            },
+            {
+                "id_jugador": 23,
                 "es_lider": true
             }
         ]
     },
     {
         "id": 2,
-        "nombre": "Test 2",
+        "nombre": "Chilemorrones",
         "jugadores": [
             {
                 "id_jugador": 1,
-                "es_lider": true
-            },
-            {
-                "id_jugador": 20,
-                "es_lider": false
-            },
-            {
-                "id_jugador": 22,
                 "es_lider": false
             },
             {
                 "id_jugador": 23,
+                "es_lider": true
+            },
+            {
+                "id_jugador": 26,
+                "es_lider": false
+            },
+            {
+                "id_jugador": 28,
+                "es_lider": false
+            },
+            {
+                "id_jugador": 31,
                 "es_lider": false
             }
         ]
