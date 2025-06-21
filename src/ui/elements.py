@@ -118,6 +118,7 @@ class RoundedButton(Canvas):
             highlightthickness=0,
             **kwargs,
         )
+        self.clicked = False
         self.radius = radius
         self.bg = bg
         self.fg = fg
@@ -176,8 +177,12 @@ class RoundedButton(Canvas):
         self._animate_color(self.itemcget(self.btn_id, "fill"), self.bg)
 
     def _on_click(self, e):
-        if self.command:
+        if self.command and not self.clicked:
+            self.clicked = True
             self.command()
+            return
+        if self.clicked:
+            self.clicked = False
 
     def _animate_color(self, from_color, to_color, steps=8, step=0):
         def hex_to_rgb(h):
@@ -246,6 +251,7 @@ class TableActionButton(Canvas):
             bd=0,
             **kwargs,
         )
+        self.clicked = False
         self.icon = PhotoImage(file=icon_path)
         self.icon_id = self.create_image(size // 2, size // 2, image=self.icon)
         self.command = command
@@ -266,8 +272,12 @@ class TableActionButton(Canvas):
         self.configure(bg=self.bg_normal)
 
     def _on_click(self, e):
-        if self.command:
+        if self.command and not self.clicked:
+            self.clicked = True
             self.command()
+            return
+        if self.clicked:
+            self.clicked = False
 
 
 class TableView(Frame):
@@ -469,7 +479,7 @@ class StyledEntry(Frame):
         self,
         parent,
         textvariable=None,
-        width=32,
+        width=400,
         font=("Consolas", 13),
         placeholder="",
         border_radius=12,
@@ -478,11 +488,11 @@ class StyledEntry(Frame):
         super().__init__(parent, bg="white")
         self.border_radius = border_radius
         self.canvas = Canvas(
-            self, bg="white", highlightthickness=0, width=400, height=48
+            self, bg="white", highlightthickness=0, width=width, height=48
         )
         self.canvas.pack(fill="x", expand=True)
         self._draw_rounded_rect(
-            6, 6, 394, 42, border_radius, fill="#F6F6F6", outline="#D5D4DC"
+            6, 6, width-6, 42, border_radius, fill="#F6F6F6", outline="#D5D4DC"
         )
         self.entry = Entry(
             self,
@@ -495,7 +505,7 @@ class StyledEntry(Frame):
             fg="#222",
             **kwargs,
         )
-        self.entry.place(x=18, y=14, width=360, height=26)
+        self.entry.place(x=18, y=14, width=width - 40, height=26)
         self.config(
             highlightbackground="#D5D4DC",
             highlightcolor="#688CCA",

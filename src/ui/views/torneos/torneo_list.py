@@ -166,7 +166,7 @@ class HistorialCard:
 
 
 class TorneoView:
-    def __init__(self, parent):
+    def __init__(self, parent, on_crear_torneo=None, on_editar_torneo=None, on_eliminar_torneo=None, on_ver_torneo=None):        
         frame = Frame(parent, bg="#EDEDED")
         frame.place(relx=0, rely=0, relwidth=1, relheight=1)
 
@@ -209,17 +209,23 @@ class TorneoView:
             TableActionButton(
                 btn_frame,
                 icon_path="assets/images/edit.png",
-                command=lambda: print(f"Editar {row[1]}"),
+                command=lambda: (
+                    on_editar_torneo(row[0]) if on_editar_torneo else None
+                )
             ).pack(side="left", padx=(0, 8))
             TableActionButton(
                 btn_frame,
                 icon_path="assets/images/delete.png",
-                command=lambda: print(f"Eliminar {row[1]}"),
+                command=lambda: (
+                    on_eliminar_torneo(row[0]) if on_eliminar_torneo else None
+                )
             ).pack(side="left", padx=(0, 8))
             TableActionButton(
                 btn_frame,
                 icon_path="assets/images/eye.png",
-                command=lambda: print(f"Ver info de {row[1]}"),
+                command=lambda: (
+                    on_ver_torneo(row[0]) if on_ver_torneo else None
+                )
             ).pack(side="left")
             return btn_frame
 
@@ -233,7 +239,7 @@ class TorneoView:
             title="Lista de torneos",
             count=len(data),
             button_text="Crear torneo",
-            button_command=lambda: print("Crear torneo"),
+            button_command=on_crear_torneo,
             col_widths=col_widths,
             action_text="Ver información",
             card_w=table_card_w,

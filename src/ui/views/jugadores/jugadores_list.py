@@ -9,6 +9,7 @@ class JugadoresView:
         on_crear_jugador=None,
         on_editar_jugador=None,
         on_eliminar_jugador=None,
+        on_ver_jugador = None,
         jugadores=None,
     ):
         frame = Frame(parent, bg="#EDEDED")
@@ -52,7 +53,7 @@ class JugadoresView:
                 bg="#9FACE8",
                 fg="white",
                 hover_bg="#688CCA",
-                command=lambda: print(f"Ver historial de {row[1]}"),
+                command=lambda : (on_ver_jugador(row[0]) if on_ver_jugador else None,)
             )
             btn.pack()
             return btn

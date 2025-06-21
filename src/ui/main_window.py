@@ -2,16 +2,16 @@ from tkinter import *
 import os
 from ui.elements import RoundedButton, AlertDialog, ConfirmDialog
 from ui.views.welcome import WelcomeView
-from ui.views.torneo import TorneoView
+from ui.views.torneos import TorneoFormView, TorneoView
 from ui.views.equipo import EquipoView
-from ui.views.jugadores import JugadoresView, JugadorFormView
+from ui.views.jugadores import JugadoresView, JugadorFormView, JugadorFormViewNoEdit
 import sys
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "mocks"))
-from ui.mocks import get_jugadores, create_jugador, update_jugador, delete_jugador
+from ui.mocks import get_jugadores, create_jugador, update_jugador, delete_jugador, get_equipos
 
 WINDOW_WIDTH = 1200
-WINDOW_HEIGHT = 800
+WINDOW_HEIGHT = 720
 BG_COLOR = "#EDEDED"
 SIDEBAR_COLOR = "#9FACE8"
 FONT_FAMILY = "Consolas"
@@ -74,7 +74,7 @@ class MainWindow:
 
         AlertDialog(parent, message, success=success, on_close=go_next)
 
-    def show_view(self, view_name, jugador_id=None):
+    def show_view(self, view_name, torneo_id=None,jugador_id=None):
         self.clear_main()
         if view_name != "welcome":
             self.show_sidebar(view_name)
@@ -85,9 +85,12 @@ class MainWindow:
         if view_name == "welcome":
             WelcomeView(main_frame, self)
         elif view_name == "torneo":
-            TorneoView(main_frame)
+            TorneoView(main_frame, lambda : self.show_view("torneo_form"), lambda torneo_id : self.show_view("torneo_form", torneo_id=torneo_id))            
+        elif view_name == "torneo_form":
+            #si torneo_id not None buscar torneo y pasarlo
+            TorneoFormView(main_frame, get_equipos())                    
         elif view_name == "equipo":
-            EquipoView(main_frame)
+            EquipoView(main_frame)        
         elif view_name == "jugadores":
             jugadores = get_jugadores()
 
@@ -112,8 +115,20 @@ class MainWindow:
                     "jugador_form", jugador_id=jugador_id
                 ),
                 on_eliminar_jugador=on_eliminar_jugador,
+                on_ver_jugador=lambda jugador_id: self.show_view(
+                    "jugador_form_no_edit", jugador_id=jugador_id
+                ),
                 jugadores=jugadores,
             )
+        elif view_name == "jugador_form_no_edit":
+            jugadores = get_jugadores()
+            jugador = None
+            if jugador_id is None: #quien muesta errores en 2025???? smh
+                self.show_view("jugadores")
+                
+            jugador = next((j for j in jugadores if j["id"] == jugador_id), None)  
+            JugadorFormViewNoEdit(main_frame, jugador)      
+
         elif view_name == "jugador_form":
             jugadores = get_jugadores()
             jugador = None

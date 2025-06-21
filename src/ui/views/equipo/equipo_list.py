@@ -7,6 +7,7 @@ from ui.elements import (
     ConfirmDialog,
 )
 from ui.views.equipo.equipo_form import EquipoFormView
+from ui.views.equipo.equipo_ver import EquipoFormViewNoEdit
 import os
 from ui.mocks import (
     get_equipos,
@@ -83,7 +84,7 @@ class EquipoView:
                 bg="#9FACE8",
                 fg="white",
                 hover_bg="#688CCA",
-                command=lambda: print(f"Ver información de {row[1]}"),
+                command=lambda: self.show_info_form(int(row[0]))
             )
             btn.pack()
             return btn
@@ -128,6 +129,18 @@ class EquipoView:
                     equipo_id, nombre, jugadores, lider
                 ),
             )
+
+    def show_info_form(self, equipo_id):
+        equipos = get_equipos()
+        equipo = next((e for e in equipos if e["id"] == equipo_id), None)
+        if equipo:
+            for widget in self.parent.winfo_children():
+                widget.destroy()
+            EquipoFormViewNoEdit(
+                parent=self.parent,
+                jugadores=get_jugadores(),
+                equipo=equipo,               
+                )            
 
     def on_save_create(self, nombre, jugadores, lider_id):
         equipos = get_equipos()
