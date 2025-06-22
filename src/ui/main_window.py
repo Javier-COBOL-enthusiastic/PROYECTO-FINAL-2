@@ -9,6 +9,8 @@ import sys
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "mocks"))
 from ui.mocks import get_jugadores, create_jugador, update_jugador, delete_jugador, get_equipos
+#@20220270 todas estas funciones son operaciones q deberia hacer la base de datos
+#Estan en ui/mocks/__init__.py
 
 WINDOW_WIDTH = 1200
 WINDOW_HEIGHT = 720
@@ -88,11 +90,14 @@ class MainWindow:
             TorneoView(main_frame, lambda : self.show_view("torneo_form"), lambda torneo_id : self.show_view("torneo_form", torneo_id=torneo_id))            
         elif view_name == "torneo_form":
             #si torneo_id not None buscar torneo y pasarlo
-            TorneoFormView(main_frame, get_equipos())                    
+            TorneoFormView(main_frame, get_equipos()) #@20220270 aca se pasan todos los equipos
+            #para poder activar y desactivar q sean parte de un torneo y eso XD              
         elif view_name == "equipo":
             EquipoView(main_frame)        
         elif view_name == "jugadores":
-            jugadores = get_jugadores()
+            jugadores = get_jugadores()#@20220270 se agarra todos los jugadores para despues
+            #solo pasarlos a la clase JugadoresView, donde se crea la tabla de los jugadores
+            #en ui/views/jugadores/jugador_create.py
 
             def on_eliminar_jugador(jugador_id):
                 def do_delete():
@@ -122,7 +127,7 @@ class MainWindow:
             )
         elif view_name == "jugador_form_no_edit":
             jugadores = get_jugadores()
-            jugador = None
+            jugador = None #@20220270 Aca se busca un jugador (el id del jugador esta en jugador_id)
             if jugador_id is None: #quien muesta errores en 2025???? smh
                 self.show_view("jugadores")
                 
@@ -131,7 +136,8 @@ class MainWindow:
 
         elif view_name == "jugador_form":
             jugadores = get_jugadores()
-            jugador = None
+            jugador = None #@20220270 Aca se busca un jugador (el id del jugador esta en jugador_id)
+            #igual solo se usa para pasarle el nombre al JugadorFormView (donde se edita al jugador)
             if jugador_id is not None:
                 jugador = next((j for j in jugadores if j["id"] == jugador_id), None)
 

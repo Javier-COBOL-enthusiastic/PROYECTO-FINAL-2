@@ -68,7 +68,7 @@ def update_equipo(equipo_id, nombre, jugadores):
             e["nombre"] = nombre
             e["jugadores"] = jugadores
             break
-    save_equipos(_equipos)
+    save_equipos(_equipos) 
 
 
 def delete_jugador(jugador_id):

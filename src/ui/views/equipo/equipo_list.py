@@ -54,7 +54,7 @@ class EquipoView:
         )
 
         headers = ["ID", "Nombre", "Participantes", "Acciones", ""]
-        equipos = get_equipos()
+        equipos = get_equipos() #@20220270 aca se llaman todos los equipos para hacer tabla
         data = [
             [f"{e['id']:02}", e["nombre"], str(len(e["jugadores"]))] for e in equipos
         ]
@@ -116,7 +116,8 @@ class EquipoView:
         )
 
     def show_edit_form(self, equipo_id):
-        equipos = get_equipos()
+        equipos = get_equipos() #@20220270 aca se hace más de lo mismo buscan el equipo
+        #para despues enviarlo al EquipoFormView q es pa editarlo
         equipo = next((e for e in equipos if e["id"] == equipo_id), None)
         if equipo:
             for widget in self.parent.winfo_children():
@@ -124,6 +125,7 @@ class EquipoView:
             EquipoFormView(
                 self.parent,
                 get_jugadores(),
+                #@20220270 Jugadores para activar o desactivar que sean parte del equipo
                 equipo=equipo,
                 on_save=lambda nombre, jugadores, lider: self.on_save_edit(
                     equipo_id, nombre, jugadores, lider
@@ -131,16 +133,18 @@ class EquipoView:
             )
 
     def show_info_form(self, equipo_id):
-        equipos = get_equipos()
+        equipos = get_equipos() #@20220270 aca se llaman todos los equipos para buscar el equipo
+        #del cual se va a mostrar la informacion
         equipo = next((e for e in equipos if e["id"] == equipo_id), None)
         if equipo:
             for widget in self.parent.winfo_children():
                 widget.destroy()
             EquipoFormViewNoEdit(
                 parent=self.parent,
-                jugadores=get_jugadores(),
+                jugadores=get_jugadores(), 
+                #@20220270 aca los jugadores para ya dentro de la clase buscar los que sean parte del equipo XD
                 equipo=equipo,               
-                )            
+            )            
 
     def on_save_create(self, nombre, jugadores, lider_id):
         equipos = get_equipos()
@@ -170,7 +174,7 @@ class EquipoView:
         )
 
     def on_save_edit(self, equipo_id, nombre, jugadores, lider_id):
-        equipos = get_equipos()
+        equipos = get_equipos() #@20220270 aca se llama a todos los equipos pa ver duplicados y esas cosas XD
         if not nombre.strip():
             AlertDialog(
                 self.parent.winfo_toplevel(), "El nombre del equipo no puede estar vacío.", success=False
@@ -203,7 +207,7 @@ class EquipoView:
         ConfirmDialog(
             self.parent.winfo_toplevel(),
             f"¿Estás seguro de que deseas eliminar el equipo '{equipo_nombre}'? Esta acción no se puede deshacer.",
-            on_confirm=lambda: self.delete_equipo(equipo_id),
+            on_confirm=lambda: self.delete_equipo(equipo_id), #@20220270 aca para eliminar equipos
             card_height=500,
         )
 

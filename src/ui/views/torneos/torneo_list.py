@@ -198,7 +198,8 @@ class TorneoView:
             anchor="n", padx=40, pady=(0, 0), fill=None, expand=False
         )
 
-        headers = ["ID", "Torneo", "Inicio", "Fin", "Estado", ""]
+        headers = ["ID", "Torneo", "Inicio", "Fin", "Estado", ""] 
+        #@20220270 aca deberia ir la llamada a todos los torneos pq aca se hace la tabla
         data = [
             [f"{i:02}", f"Torneo {i}", "01/01/24", "05/01/24", "Pendiente"]
             for i in range(1, 10)
