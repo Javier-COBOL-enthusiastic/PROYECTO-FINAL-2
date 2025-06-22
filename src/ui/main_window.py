@@ -141,7 +141,7 @@ class MainWindow:
             if jugador_id is not None:
                 jugador = next((j for j in jugadores if j["id"] == jugador_id), None)
 
-            def crear_jugador(nombre):
+            def crear_jugador(nombre, puntos):
                 nombre = nombre.strip()
                 if not nombre or nombre == "" or nombre == "Nombre del jugador...":
                     self.show_alert(
@@ -158,7 +158,7 @@ class MainWindow:
                         )
                         return
                 try:
-                    create_jugador(nombre)
+                    create_jugador(nombre, puntos)
                     self.show_alert(
                         self.root,
                         "Dato agregado exitosamente",
@@ -173,7 +173,7 @@ class MainWindow:
                         next_view="jugadores",
                     )
 
-            def actualizar_jugador(nombre, id):
+            def actualizar_jugador(nombre, puntos, id):
                 nombre = nombre.strip()
                 if not nombre:
                     self.show_alert(
@@ -190,7 +190,7 @@ class MainWindow:
                         )
                         return
                 try:
-                    update_jugador(id, nombre)
+                    update_jugador(id, nombre, puntos)
                     self.show_alert(
                         self.root,
                         "Dato actualizado exitosamente",
@@ -205,16 +205,17 @@ class MainWindow:
                         next_view="jugadores",
                     )
 
-            def on_save(nombre, id, is_editing):
+            def on_save(nombre, puntos, id, is_editing):
                 if is_editing:
-                    actualizar_jugador(nombre, id)
+                    actualizar_jugador(nombre, puntos, id)
                 else:
-                    crear_jugador(nombre)
+                    crear_jugador(nombre, puntos)
 
             JugadorFormView(
                 main_frame,
-                on_save=lambda nombre, id: on_save(nombre, id, jugador_id is not None),
+                on_save=lambda nombre, puntos, id: on_save(nombre, puntos, id, jugador_id is not None),
                 initial_name=jugador["nombre"] if jugador else "",
+                initial_points=jugador["puntos"] if jugador else 0,
                 jugador_id=jugador_id,
             )
 

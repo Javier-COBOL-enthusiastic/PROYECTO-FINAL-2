@@ -39,8 +39,8 @@ class JugadoresView:
             anchor="n", padx=40, pady=(0, 0), fill=None, expand=False
         )
 
-        headers = ["ID", "Nombre", "Acciones", ""]
-        data = [[j["id"], j["nombre"]] for j in (jugadores or [])]
+        headers = ["ID", "Nombre", "Puntos Obtenidos", "Acciones", ""]
+        data = [[j["id"], j["nombre"], j["puntos"]] for j in (jugadores or [])]
 
         def info_button(row, parent, text):
             btn = RoundedButton(
@@ -76,7 +76,8 @@ class JugadoresView:
             ).pack(side="left", padx=(0, 8))
             return btn_frame
 
-        col_widths = [60, 400, 200, 200]
+        col_widths = [60, 400, 200, 200, 100]
+
 
         table = TableView(
             table_card_container,

@@ -35,12 +35,12 @@ def save_equipos(equipos):
         json.dump(_equipos, f, ensure_ascii=False, indent=4)
 
 
-def create_jugador(nombre):
+def create_jugador(nombre, puntos=0):
     nombre_lower = nombre.lower()
     if any(j["nombre"].lower() == nombre_lower for j in _jugadores):
         return None  # No agregar duplicados
     new_id = max([j["id"] for j in _jugadores], default=0) + 1
-    jugador = {"id": new_id, "nombre": nombre}
+    jugador = {"id": new_id, "nombre": nombre, "puntos": puntos}
     _jugadores.append(jugador)
     save_jugadores(_jugadores)
     return jugador
@@ -54,12 +54,14 @@ def create_equipo(nombre, jugadores):
     return equipo
 
 
-def update_jugador(jugador_id, nombre):
+def update_jugador(jugador_id, nombre, puntos):
     for j in _jugadores:
         if j["id"] == jugador_id:
             j["nombre"] = nombre
+            j["puntos"] = puntos
             break
     save_jugadores(_jugadores)
+
 
 
 def update_equipo(equipo_id, nombre, jugadores):

@@ -3,7 +3,7 @@ from ui.elements import RoundedButton, StyledEntry
 
 
 class JugadorFormView:
-    def __init__(self, parent, on_save=None, initial_name="", jugador_id=None):
+    def __init__(self, parent, on_save=None, initial_name="", initial_points=0, jugador_id=None):
         frame = Frame(parent, bg="#EDEDED")
         frame.place(relx=0, rely=0, relwidth=1, relheight=1)
 
@@ -47,6 +47,11 @@ class JugadorFormView:
             border_radius=16,
         ).pack(fill="x", padx=20, pady=(0, 32), anchor="w")
 
+        # Campo: Puntos obtenidos
+
+        self.puntos_var = IntVar(value=initial_points)
+        
+
         RoundedButton(
             card,
             text="Guardar",
@@ -55,6 +60,8 @@ class JugadorFormView:
             radius=18,
             font=("Consolas", 13, "bold"),
             command=lambda: (
-                on_save(self.name_var.get(), jugador_id) if on_save else None
+                on_save(self.name_var.get(), self.puntos_var.get(), jugador_id)
+                if on_save else None
             ),
+
         ).pack(pady=(0, 0), padx=20, anchor="w")

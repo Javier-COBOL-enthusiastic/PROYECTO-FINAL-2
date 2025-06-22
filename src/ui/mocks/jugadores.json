@@ -1,38 +1,12 @@
 [
     {
-        "id": 1,
-        "nombre": "Kirby"
+        "id": 2,
+        "nombre": "Juan",
+        "puntos": 0
     },
     {
-        "id": 23,
-        "nombre": "Lucy"
-    },
-    {
-        "id": 26,
-        "nombre": "Emely"
-    },
-    {
-        "id": 27,
-        "nombre": "Emilico"
-    },
-    {
-        "id": 28,
-        "nombre": "Mao mao"
-    },
-    {
-        "id": 29,
-        "nombre": "Loulan"
-    },
-    {
-        "id": 30,
-        "nombre": "Monica"
-    },
-    {
-        "id": 31,
-        "nombre": "Albedo"
-    },
-    {
-        "id": 32,
-        "nombre": "Yair17"
+        "id": 3,
+        "nombre": "Ivan",
+        "puntos": 0
     }
 ]
