@@ -1,4 +1,5 @@
 from tkinter import *
+from datetime import datetime
 from ui.elements import TableView, MenuButton, TableActionButton
 import os
 from tkinter import PhotoImage
@@ -187,8 +188,42 @@ class TorneoView:
         # Más espacio entre el título y la tarjeta
         Frame(frame, height=18, bg="#EDEDED").pack()
 
+        inia = 0
+        pnd = 0
+        finalz = 0      
+
+        actual = datetime.now()
+        cmp = datetime(actual.year, actual.month, actual.day)
+
+        data = []
+        for torneo in  get_torneos():
+            data.append([torneo["id"], torneo["nombre"], torneo["inicio"], torneo["fin"]])
+            a = torneo["inicio"]
+            b = torneo["fin"]
+            f_1 = datetime.strptime(a, "%d/%m/%Y")
+            f_2 = datetime.strptime(b, "%d/%m/%Y")
+            if(f_1 >= cmp and len(torneo["rondas"][-1][0]) == 3 and (torneo["rondas"][-1][0][2] == None)):
+                inia += 1
+
+            elif(len(torneo["rondas"][-1][0]) == 3 and torneo["rondas"][-1][0][2] != None):
+                finalz += 1
+
+            elif(f_2 < cmp):
+                pnd += 1
+                        
+            if(f_1 > cmp):
+                pnd += 1
+        
+        
+
+
+  
+            
+
+
+
         # Usar la nueva clase para el historial
-        estados = [("Iniciado", 1), ("Pendiente", 3), ("Finalizado", 5)]
+        estados = [("Iniciado", inia), ("Pendiente", pnd), ("Finalizado", finalz)]
         self.historial = HistorialCard(frame, estados)
 
         # Tabla torneos
@@ -202,11 +237,6 @@ class TorneoView:
 
         headers = ["ID", "Torneo", "Inicio", "Fin", ""] 
         
-        data = []
-        for torneo in  get_torneos():
-            data.append([torneo["id"], torneo["nombre"],
-                        torneo["inicio"], torneo["fin"]])
-
         def action_buttons(row, parent, text):
             btn_frame = Frame(parent, bg=parent["bg"])
             TableActionButton(

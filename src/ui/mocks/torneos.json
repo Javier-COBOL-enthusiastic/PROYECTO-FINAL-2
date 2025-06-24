@@ -138,5 +138,201 @@
             ]
         ],
         "id": 1
+    },
+    {
+        "nombre": "Prueba 44",
+        "inicio": "25/6/2025",
+        "fin": "25/6/2025",
+        "juego": "1",
+        "rondas": [
+            [
+                [
+                    {
+                        "id": 1,
+                        "nombre": "Equipo test",
+                        "jugadores": [
+                            {
+                                "id_jugador": 1,
+                                "es_lider": false
+                            },
+                            {
+                                "id_jugador": 27,
+                                "es_lider": false
+                            },
+                            {
+                                "id_jugador": 33,
+                                "es_lider": false
+                            },
+                            {
+                                "id_jugador": 23,
+                                "es_lider": true
+                            }
+                        ]
+                    },
+                    {
+                        "id": 5,
+                        "nombre": "dddd",
+                        "jugadores": [
+                            {
+                                "id_jugador": 1,
+                                "es_lider": false
+                            },
+                            {
+                                "id_jugador": 27,
+                                "es_lider": true
+                            }
+                        ]
+                    },
+                    null,
+                    false
+                ],
+                [
+                    {
+                        "id": 4,
+                        "nombre": "asd",
+                        "jugadores": [
+                            {
+                                "id_jugador": 32,
+                                "es_lider": false
+                            },
+                            {
+                                "id_jugador": 31,
+                                "es_lider": true
+                            }
+                        ]
+                    },
+                    {
+                        "id": 2,
+                        "nombre": "Chilemorrones",
+                        "jugadores": [
+                            {
+                                "id_jugador": 1,
+                                "es_lider": true
+                            },
+                            {
+                                "id_jugador": 23,
+                                "es_lider": false
+                            },
+                            {
+                                "id_jugador": 26,
+                                "es_lider": false
+                            },
+                            {
+                                "id_jugador": 28,
+                                "es_lider": false
+                            },
+                            {
+                                "id_jugador": 31,
+                                "es_lider": false
+                            }
+                        ]
+                    },
+                    null,
+                    false
+                ]
+            ],
+            [
+                []
+            ]
+        ],
+        "id": 3
+    },
+    {
+        "nombre": "Prueba 22",
+        "inicio": "26/8/2025",
+        "fin": "26/8/2025",
+        "juego": "0",
+        "rondas": [
+            [
+                [
+                    {
+                        "id": 1,
+                        "nombre": "Equipo test",
+                        "jugadores": [
+                            {
+                                "id_jugador": 1,
+                                "es_lider": false
+                            },
+                            {
+                                "id_jugador": 27,
+                                "es_lider": false
+                            },
+                            {
+                                "id_jugador": 33,
+                                "es_lider": false
+                            },
+                            {
+                                "id_jugador": 23,
+                                "es_lider": true
+                            }
+                        ]
+                    },
+                    {
+                        "id": 5,
+                        "nombre": "dddd",
+                        "jugadores": [
+                            {
+                                "id_jugador": 1,
+                                "es_lider": false
+                            },
+                            {
+                                "id_jugador": 27,
+                                "es_lider": true
+                            }
+                        ]
+                    },
+                    null,
+                    false
+                ],
+                [
+                    {
+                        "id": 4,
+                        "nombre": "asd",
+                        "jugadores": [
+                            {
+                                "id_jugador": 32,
+                                "es_lider": false
+                            },
+                            {
+                                "id_jugador": 31,
+                                "es_lider": true
+                            }
+                        ]
+                    },
+                    {
+                        "id": 2,
+                        "nombre": "Chilemorrones",
+                        "jugadores": [
+                            {
+                                "id_jugador": 1,
+                                "es_lider": true
+                            },
+                            {
+                                "id_jugador": 23,
+                                "es_lider": false
+                            },
+                            {
+                                "id_jugador": 26,
+                                "es_lider": false
+                            },
+                            {
+                                "id_jugador": 28,
+                                "es_lider": false
+                            },
+                            {
+                                "id_jugador": 31,
+                                "es_lider": false
+                            }
+                        ]
+                    },
+                    null,
+                    false
+                ]
+            ],
+            [
+                []
+            ]
+        ],
+        "id": 4
     }
 ]

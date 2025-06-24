@@ -26,7 +26,7 @@ class TorneoFormView:
 
         self.clean_data = [x for i, x in self.torneo.items()]
         
-        print(self.clean_data)     
+        #print(self.clean_data)     
         
         #toca agregar algo pa ver si el nombre no es repetido?? @20220270
         if(len(self.clean_data[0]) == 0 or self.clean_data[0] == "Nombre del torneo..."):
@@ -146,9 +146,11 @@ class TorneoFormView:
                 success=False, on_close=self.__show_list
             )
             return
-    
-        self.volver()
-
+        AlertDialog(
+            parent=self.parent.winfo_toplevel(),
+            message="Torneo creado.",
+            on_close=self.volver(),
+        )        
                         
     
     def __valid_format__(self, fecha : str):        

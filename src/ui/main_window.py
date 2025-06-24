@@ -2,13 +2,13 @@ from tkinter import *
 import os
 from ui.elements import RoundedButton, AlertDialog, ConfirmDialog
 from ui.views.welcome import WelcomeView
-from ui.views.torneos import TorneoFormView, TorneoView, TorneoEdit
+from ui.views.torneos import TorneoFormView, TorneoView, TorneoEdit, TorneoFormViewNoEdit
 from ui.views.equipo import EquipoView
 from ui.views.jugadores import JugadoresView, JugadorFormView, JugadorFormViewNoEdit
 import sys
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "mocks"))
-from ui.mocks import get_jugadores, create_jugador, update_jugador, delete_jugador, get_equipos, get_torneos, update_torneo
+from ui.mocks import get_jugadores, create_jugador, update_jugador, delete_jugador, get_equipos, get_torneos, update_torneo, delete_torneo
 
 
 WINDOW_WIDTH = 1200
@@ -86,9 +86,32 @@ class MainWindow:
         if view_name == "welcome":
             WelcomeView(main_frame, self)
         elif view_name == "torneo":
-            TorneoView(main_frame, on_crear_torneo=lambda : self.show_view("torneo_form"), on_editar_torneo=lambda torneo_id : self.show_view("torneo_edit", torneo_id=torneo_id))            
+            def on_delete_torneo(torneo_id):
+                def do_delete():
+                    delete_torneo(torneo_id)
+                    self.show_view(
+                        "torneo"
+                    )  # Solo recarga la vista, no muestra dialog extra
+
+                ConfirmDialog(
+                    self.root,
+                    "¿Estás seguro que deseas eliminar este torneo?",
+                    on_confirm=do_delete,
+                    on_cancel=None,
+                )
+                    
+
+                
+            TorneoView(main_frame, on_crear_torneo=lambda : self.show_view("torneo_form"), on_eliminar_torneo=lambda torneo_id : on_delete_torneo(torneo_id), on_editar_torneo=lambda torneo_id : self.show_view("torneo_edit", torneo_id=torneo_id), on_ver_torneo=lambda torneo_id : self.show_view("torneo_view", torneo_id))            
         elif view_name == "torneo_form":            
             TorneoFormView(main_frame, get_jugadores(), get_equipos(), lambda : self.show_view("torneo"))   
+        elif view_name == "torneo_view":
+            torneos = get_torneos()
+            if torneo_id is None:
+                self.show_view("torneo")
+            
+            torneo = next((j for j in torneos if j["id"] == torneo_id), None)   
+            TorneoFormViewNoEdit(main_frame, torneo)
         elif view_name == "torneo_edit":
             torneos = get_torneos()
             if torneo_id is None:
@@ -97,7 +120,10 @@ class MainWindow:
             torneo = next((j for j in torneos if j["id"] == torneo_id), None)          
             def on_save_torneo(torneo):
                 update_torneo(torneo)
-                self.show_view("torneo")
+                self.show_alert(
+                    self.root, "Torneo actualizado."
+                )
+                self.show_view("torneo")                        
             TorneoEdit(main_frame, torneo, on_save=on_save_torneo)
         elif view_name == "equipo":
             EquipoView(main_frame)        

@@ -74,5 +74,19 @@
                 "es_lider": true
             }
         ]
+    },
+    {
+        "id": 6,
+        "nombre": "kjshdkjashdkjgasdkjashdkagsjdfijdwkjfgadskjfhdkjewbdjcewnkcnbhjwevfckjewfckjsfkjabdfkj",
+        "jugadores": [
+            {
+                "id_jugador": 1,
+                "es_lider": true
+            },
+            {
+                "id_jugador": 26,
+                "es_lider": false
+            }
+        ]
     }
 ]
