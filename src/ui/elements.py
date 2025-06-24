@@ -440,10 +440,10 @@ class TableView(Frame):
         rows_frame.bind("<Configure>", on_configure)
         table_canvas.bind("<Configure>", on_configure)
 
-        def _on_mousewheel(event):
+        def _on_mousewheel(event):                   
             table_canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
 
-        table_canvas.bind_all("<MouseWheel>", _on_mousewheel)
+        table_canvas.bind_all("<MouseWheel>", _on_mousewheel)        
         for r, row in enumerate(self.data):
             row_bg = "#EEEEEE" if r % 2 == 1 else "white"
             row_frame = Frame(rows_frame, bg=row_bg)
@@ -580,6 +580,283 @@ class StyledEntry(Frame):
         self.entry.delete(0, "end")
         self.entry.insert(0, value)
 
+class StyledCombobox(Frame):
+    def __init__(
+        self,
+        parent,
+        values=None,
+        textvariable=None,
+        width=400,
+        height=48,
+        font=("Consolas", 13),
+        placeholder="",
+        border_radius=12,
+        mousewheel_callback = None
+    ):
+        super().__init__(parent, bg="white")
+        self.border_radius = border_radius
+        self.width = width
+        self.height = height
+        self.values = values or []
+        self.font = font
+        self.placeholder = placeholder
+        self.textvar = textvariable
+        self._on_mousewheel_callback = mousewheel_callback
+        self.dropdown_canvas = None
+        
+        self.canvas = Canvas(
+            self, 
+            width=width, 
+            height=height, 
+            bg="white", 
+            highlightthickness=0
+        )
+        self.canvas.pack(fill="x", expand=True)
+        
+        self._draw_rounded_rect(
+            0, 0, width, height, border_radius, 
+            fill="#F6F6F6", outline="#D5D4DC"
+        )
+        
+        self.text = self.canvas.create_text(
+            18, 
+            height//2, 
+            text=placeholder, 
+            font=font, 
+            fill="#888", 
+            anchor="w"
+        )
+        
+        flecha_size = 8
+        self.flecha = self.canvas.create_polygon(
+            width - 24, height//2 - flecha_size//2,
+            width - 16, height//2 - flecha_size//2,
+            width - 20, height//2 + flecha_size//2,
+            fill="#888"
+        )
+        
+        self.selected_val = None
+        self.dropdown = False
+        
+        self.canvas.bind("<Button-1>", self._on_click)
+        self.canvas.bind("<Enter>", self._on_enter)
+        self.canvas.bind("<Leave>", self._on_leave)
+        
+        self.dropdown_frame = None
+        
+        if placeholder and (not textvariable or not textvariable.get()):
+            self._set_placeholder()
+        elif(textvariable.get()):
+            self._select_item(textvariable.get())
+    
+    def _draw_rounded_rect(self, x1, y1, x2, y2, r, **kwargs):
+        points = [
+            x1 + r,
+            y1,
+            x2 - r,
+            y1,
+            x2,
+            y1,
+            x2,
+            y1 + r,
+            x2,
+            y2 - r,
+            x2,
+            y2,
+            x2 - r,
+            y2,
+            x1 + r,
+            y2,
+            x1,
+            y2,
+            x1,
+            y2 - r,
+            x1,
+            y1 + r,
+            x1,
+            y1,
+        ]                
+        return self.canvas.create_polygon(points, smooth=True, **kwargs)
+    
+    def _on_enter(self, e):
+        self.canvas.itemconfig(1, outline="#688CCA")
+        self.canvas.itemconfig(self.flecha, fill="#688CCA")
+    
+    def _on_leave(self, e):
+        if not self.dropdown:
+            self.canvas.itemconfig(1, outline="#D5D4DC")
+            self.canvas.itemconfig(self.flecha, fill="#888")
+    
+    def _on_click(self, e):
+        if not self.dropdown:
+            self._open_dropdown()
+        else:
+            self._close_dropdown()
+    
+    def _open_dropdown(self):
+        self.dropdown = True
+        self.canvas.itemconfig(1, outline="#688CCA")
+        self.canvas.itemconfig(self.flecha, fill="#688CCA")
+        if self._on_mousewheel_callback is not None:
+            self._mousewheel_callback = self.winfo_toplevel().bind("<MouseWheel>")
+            self.winfo_toplevel().unbind("<MouseWheel>")
+
+        self.dropdown_frame = Frame(
+            self.winfo_toplevel(),
+            bg="white",
+            highlightbackground="#688CCA",
+            highlightthickness=1
+        )
+        
+        x = self.winfo_rootx()
+        y = self.winfo_rooty() + self.height
+        
+        max_h = min(150, len(self.values) * 36 + 10)
+        self.dropdown_frame.place(x=x, y=y, width=self.width, height=max_h)
+        
+        self.dropdown_canvas = Canvas(
+            self.dropdown_frame,
+            bg="white",
+            highlightthickness=0
+        )
+        self.dropdown_canvas.pack(side="left", fill="both", expand=True)
+        
+        scrollbar = Scrollbar(
+            self.dropdown_frame,
+            orient="vertical",
+            command=self.dropdown_canvas.yview
+        )
+        scrollbar.pack(side="right", fill="y")
+        
+        self.dropdown_canvas.configure(yscrollcommand=scrollbar.set)
+
+        def _on_mousewheel(event):
+            if self.dropdown_canvas and self.dropdown:  # Verificar que exista y esté abierto
+                self.dropdown_canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+        
+        self.dropdown_canvas.bind_all("<MouseWheel>", _on_mousewheel)
+
+        items_frame = Frame(self.dropdown_canvas, bg="white")
+        self.dropdown_canvas.create_window((0, 0), window=items_frame, anchor="nw")
+        
+        def on_frame_configure(e):
+            self.dropdown_canvas.configure(scrollregion=self.dropdown_canvas.bbox("all"))
+        
+        items_frame.bind("<Configure>", on_frame_configure)
+        
+        for i, value in enumerate(self.values):
+            card_frame = Frame(items_frame, bg="white")
+            card_frame.pack(fill="x", pady=(2 if i == 0 else 0, 2))
+            
+            card = Canvas(
+                card_frame,
+                width=self.width - 2,
+                height=32,
+                bg="white",
+                highlightthickness=0
+            )
+            card.pack(fill="x")
+            
+
+            card.create_rectangle(
+                1, 1, self.width - 3, 31,
+                fill="#F6F6F6" if i % 2 == 0 else "white",
+                outline="#F6F6F6" if i % 2 == 0 else "white"
+            )
+            
+            card.create_text(
+                10, 16,
+                text=value,
+                font=self.font,
+                fill="#222",
+                anchor="w"
+            )
+            
+            card.bind("<Enter>", lambda e, c=card: self._on_item_enter(e, c))
+            card.bind("<Leave>", lambda e, c=card: self._on_item_leave(e, c))
+            card.bind("<Button-1>", lambda e, v=value: self._select_item(v))
+                
+        self.winfo_toplevel().bind("<Button-1>", self._check_click_outside, add="+")
+    
+    def _on_item_enter(self, e, canvas):
+        canvas.itemconfig(1, fill="#E0E0E0", outline="#E0E0E0")
+    
+    def _on_item_leave(self, e, canvas):
+        index = self.values.index(canvas.itemcget(2, "text"))
+        canvas.itemconfig(1, 
+            fill="#F6F6F6" if index % 2 == 0 else "white",
+            outline="#F6F6F6" if index % 2 == 0 else "white"
+        )
+    
+    def _select_item(self, value):
+        self.selected_val = value
+        self.canvas.itemconfig(self.text, text=value, fill="#222")
+        
+        if self.textvar:
+            self.textvar.set(value)
+        
+        self._close_dropdown()
+    
+    def _close_dropdown(self):
+        if self.dropdown_frame:
+            self.dropdown_frame.destroy()
+            self.dropdown_frame = None            
+            self.dropdown_canvas = None
+        
+        self.dropdown = False
+        self.canvas.itemconfig(1, outline="#D5D4DC")
+        self.canvas.itemconfig(self.flecha, fill="#888")
+
+        if self._on_mousewheel_callback is not None:
+            self.winfo_toplevel().bind("<MouseWheel>", self._on_mousewheel_callback)
+    
+        self.winfo_toplevel().unbind("<Button-1>")
+    
+    def _check_click_outside(self, e):
+        if not self.dropdown_frame:
+            return
+                    
+        combobox_x = self.winfo_rootx()
+        combobox_y = self.winfo_rooty()
+        combobox_width = self.winfo_width()
+        combobox_height = self.winfo_height()
+        
+        dropdown_y = combobox_y + combobox_height
+        dropdown_height = self.dropdown_frame.winfo_height()
+        
+        if (e.x_root < combobox_x or 
+            e.x_root > combobox_x + combobox_width or
+            e.y_root < combobox_y or 
+            (e.y_root > combobox_y + combobox_height and 
+             e.y_root < dropdown_y) or
+            e.y_root > dropdown_y + dropdown_height):
+            
+            self._close_dropdown()
+    
+    def _set_placeholder(self):
+        self.canvas.itemconfig(self.text, text=self.placeholder, fill="#888")
+    
+    def get(self):
+        if self.selected_val == self.placeholder:
+            return ""
+        return self.selected_val
+    
+    def set(self, value):
+        if value in self.values:
+            self.selected_val = value
+            self.canvas.itemconfig(self.text, text=value, fill="#222")
+            if self.textvar:
+                self.textvar.set(value)
+        elif not value:
+            self._set_placeholder()
+    
+    def configure(self, **kwargs):
+        if 'values' in kwargs:
+            self.values = kwargs['values']
+            if self.selected_val and self.selected_val not in self.values:
+                self._set_placeholder()
+                self.selected_val = None
+
 
 class AlertDialog(Frame):
     _instance = None  # Singleton para evitar múltiples diálogos
@@ -659,7 +936,7 @@ class AlertDialog(Frame):
 
 class ConfirmDialog(Frame):
     def __init__(
-        self, parent, message, on_confirm=None, on_cancel=None, card_height=None
+        self, parent, message, on_confirm=None, on_cancel=None, card_height=None, ops = ("Cancelar", "Eliminar")
     ):
         from ui.elements import RoundedButton
 
@@ -715,7 +992,7 @@ class ConfirmDialog(Frame):
 
         RoundedButton(
             btn_frame,
-            text="Cancelar",
+            text=ops[0],
             width=220,
             height=56,
             radius=22,
@@ -727,7 +1004,7 @@ class ConfirmDialog(Frame):
         ).pack(side="left", padx=36)
         RoundedButton(
             btn_frame,
-            text="Eliminar",
+            text=ops[1],
             width=220,
             height=56,
             radius=22,

@@ -1,12 +1,47 @@
 [
     {
-        "id": 2,
-        "nombre": "Juan",
-        "puntos": 0
+        "id": 1,
+        "nombre": "Kirby",
+        "puntos": 10
     },
     {
-        "id": 3,
-        "nombre": "Ivan",
-        "puntos": 0
+        "id": 23,
+        "nombre": "Lucy",
+        "puntos": 15
+    },
+    {
+        "id": 26,
+        "nombre": "Emely",
+        "puntos": 20
+    },
+    {
+        "id": 27,
+        "nombre": "Emilico",
+        "puntos": 25
+    },
+    {
+        "id": 28,
+        "nombre": "Mao mao",
+        "puntos": 30
+    },
+    {
+        "id": 29,
+        "nombre": "Loulan",
+        "puntos": 35
+    },
+    {
+        "id": 30,
+        "nombre": "Monica",
+        "puntos": 40
+    },
+    {
+        "id": 31,
+        "nombre": "Albedo",
+        "puntos": 45
+    },
+    {
+        "id": 32,
+        "nombre": "Yair17",
+        "puntos": 50
     }
 ]

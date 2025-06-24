@@ -1,26 +1,183 @@
 from tkinter import *
-from ui.elements import RoundedButton, StyledEntry, TableActionButton
+from ui.elements import RoundedButton, StyledEntry, StyledCombobox, AlertDialog
 from ui.views.equipo.equipo_form import EquipoFormView
-from ui.mocks import get_jugadores, update_equipo
-from ui.elements import RoundedButton, AlertDialog    
+from ui.views.jugadores import JugadorFormView
+from ui.mocks import update_jugador, update_equipo, create_torneo, delete_torneo
+from datetime import datetime
 
 
 
 
+class TorneoFormView:
+    def actualizar_torneo(self):
+         self.torneo = {
+                "nombre":self.name_var.get(), 
+                "inicio":self.inicio.get(), 
+                "fin":self.fin.get(), 
+                "juego":self.juego_selec.get()
+        }     
 
-class TorneoFormView:  
-    def on_save_edit(self, equipo_id, nombre, jugadores, lider_id):
+    def impar_cancelar(self):            
+            delete_torneo(self.torneo["id"])
+            self.__show_list()
+
+    def on_save(self):
+        self.actualizar_torneo()             
+
+        self.clean_data = [x for i, x in self.torneo.items()]
+        
+        print(self.clean_data)     
+        
+        #toca agregar algo pa ver si el nombre no es repetido?? @20220270
+        if(len(self.clean_data[0]) == 0 or self.clean_data[0] == "Nombre del torneo..."):
+            AlertDialog(
+                self.parent.winfo_toplevel(), "El nombre del torneo no puede estar vacío.", success=False, on_close=self.__show_list
+            )
+            return
+
+
+        if(len(self.clean_data[-1]) == 0): 
+            AlertDialog(
+                self.parent.winfo_toplevel(), "El juego es invalido.", success=False, on_close=self.__show_list
+            )
+            return
+
+
+        
+        r1 = self.__valid_format__(self.clean_data[1])
+        r2 = self.__valid_format__(self.clean_data[2])
+        if(not(r1 and r2)):
+            AlertDialog(
+                self.parent.winfo_toplevel(), "El formato del fecha es incorrecto. \nEjemplo correcto: '02/07/2025'", success=False, on_close=self.__show_list
+            )
+            return
+        f_1 = None
+        f_2 = None
+        try:
+            f_1 = datetime.strptime(self.clean_data[1], "%d/%m/%Y")
+            f_2 = datetime.strptime(self.clean_data[2], "%d/%m/%Y")
+        except ValueError:
+            AlertDialog(self.parent.winfo_toplevel(), "El formato del fecha es incorrecto. \nEjemplo correcto: '02/07/2025'", success=False, on_close=self.__show_list)
+            return
+        
+        
+
+    
+        if(f_2 < f_1): #el inicio es despues del fin xd????
+            AlertDialog(
+                self.parent.winfo_toplevel(), "La fechas de fin es invalida.", success=False, on_close=self.__show_list
+            )
+            return
+        actual = datetime.now()
+        cmp = datetime(actual.year, actual.month, actual.day)
+        if(f_1 < cmp):
+            AlertDialog(
+                self.parent.winfo_toplevel(), "La fecha de inicio es invalida", success=False, on_close=self.__show_list
+            )
+            return
+        n_participantes = len(self.selected)
+        if n_participantes <= 1:
+            AlertDialog(
+                self.parent.winfo_toplevel(), "El número de participantes es menor o igual que 1.", success=False, on_close=self.__show_list
+            )
+            return        
+
+                    
+        if n_participantes % 2 != 0: #Hay q ver como manejar esto XD
+            AlertDialog(
+                self.parent.winfo_toplevel(), 
+                "El número de participantes es impar.", 
+                success=False, on_close=self.__show_list
+            )
+            return
+        
+        #Parte de crear el torneo y matchmaking
+        matches = []
+        any_unbalanced = False
+        data = []
+        if self.mostrar_equipo:                    
+            data = [j for j in self.equipos if j["id"] in self.selected]
+
+            def add_puntos(equipo): #quitar despues?
+                suma = 0
+                for id in equipo["jugadores"]:
+                    for jugador in self.jugadores:
+                        if(jugador["id"] == id["id_jugador"]):
+                            suma += jugador["puntos"]                                
+                return (equipo, suma)            
+            
+            data = [add_puntos(j) for j in data]
+            data = sorted(data, key=lambda x : x[1])
+                       
+        else:
+            data = [j for j in self.jugadores if j["id"] in self.selected]        
+            data = sorted(data, key=lambda a : a["puntos"])
+
+
+        for i in range(0, len(data) - 1, 2):
+            if not self.mostrar_equipo:
+                diff = data[i]["puntos"] < data[i + 1]["puntos"] - 20
+            else:
+                diff = data[i][1] < data[i + 1][1] - 30
+            any_unbalanced = diff or any_unbalanced
+            if self.mostrar_equipo:
+                matches.append((data[i][0], data[i + 1][0], None, diff))
+            else:
+                matches.append((data[i], data[i + 1], None, diff))
+        
+        #El None sera el id del ganador
+
+        rondas = (len(matches) // 2)
+        
+        self.torneo["rondas"] = []
+        self.torneo["rondas"].append(matches)  
+        for i in range(1, rondas + 1):
+            mult = (len(self.torneo["rondas"][i - 1]) // 2)
+            self.torneo["rondas"].append([])
+            for j in range(mult):
+                self.torneo["rondas"][i].append([])
+        
+
+        res = create_torneo(self.torneo)
+        if res is None:
+            AlertDialog(
+                self.parent.winfo_toplevel(), 
+                "Ya existe un torneo con este nombre.", 
+                success=False, on_close=self.__show_list
+            )
+            return
+    
+        self.volver()
+
+                        
+    
+    def __valid_format__(self, fecha : str):        
+        if(len(fecha) <= 0):
+            return False
+        if(fecha.count("/") < 1): #Se puede hacer por separado pero pq me dieron ganas asi
+            return False
+            
+        fecha = fecha.split("/")#Arreglando por si solo puso 1/6/2025 ejemplo
+        if(len(fecha[0]) < 2):
+            fecha[0] = '0' + fecha[0]    
+        if(len(fecha[1]) < 2): #Arreglando por si solo puso 25/6/2025 ejemplo
+            fecha[1] = '0' + fecha[1]                
+        fecha = str.join("/", fecha)
+        return True
+
+
+    def on_save_equipo_edit(self, equipo_id, nombre, jugadores, lider_id):
         equipos = self.equipos
         if not nombre.strip():
             AlertDialog(
-                self.parent.winfo_toplevel(), "El nombre del equipo no puede estar vacío.", success=False
+                self.parent.winfo_toplevel(), "El nombre del equipo no puede estar vacío.", success=False, on_close=self.__show_list
             )
             return
         if not jugadores:
-            AlertDialog(self.parent.winfo_toplevel(), "Selecciona al menos un equipo.", success=False)
+            AlertDialog(self.parent.winfo_toplevel(), "Selecciona al menos un equipo.", success=False, on_close=self.__show_list)
             return
         if not lider_id or not any(j["id_jugador"] == lider_id for j in jugadores):
-            AlertDialog(self.parent.winfo_toplevel(), "Selecciona un líder válido.", success=False)
+            AlertDialog(self.parent.winfo_toplevel(), "Selecciona un líder válido.", success=False, on_close=self.__show_list)
             return
         if any(
             e["nombre"].strip().lower() == nombre.strip().lower()
@@ -28,7 +185,7 @@ class TorneoFormView:
             for e in equipos
         ):
             AlertDialog(
-                self.parent.winfo_toplevel(), "Ya existe un equipo con ese nombre.", success=False
+                self.parent.winfo_toplevel(), "Ya existe un equipo con ese nombre.", success=False, on_close=self.__show_list
             )
             return
         update_equipo(equipo_id, nombre, jugadores)
@@ -36,14 +193,64 @@ class TorneoFormView:
             self.parent.winfo_toplevel(),
             "Equipo actualizado exitosamente.",
             success=True,
-            on_close=self.__show_list(),
+            on_close=self.__show_list,
         )
+    
+    def on_save_jugador_edit(self, nombre, puntos, id):
+                nombre = nombre.strip()
+                if not nombre:
+                    AlertDialog(
+                        self.frame, "El nombre no puede estar vacío", success=False
+                    )
+                    return
+                nombre_lower = nombre.lower()
+                for j in self.jugadores:
+                    if j["nombre"].lower() == nombre_lower and j["id"] != id:
+                        AlertDialog(
+                            self.frame,
+                            "Ya existe un jugador con ese nombre",
+                            success=False,
+                            on_close=self.__show_list
+                        )
+                        return
+                try:
+                    update_jugador(id, nombre, puntos)
+                    AlertDialog(
+                        self.frame,
+                        "Dato actualizado exitosamente",
+                        success=True,
+                        on_close=self.__show_list                  
+                    )
+                except Exception as e:
+                    AlertDialog(
+                        self.frame,
+                        "Ha ocurrido un error",
+                        success=False,
+                        on_close=self.__show_list
+                    )
         
+    def show_jugador_edit_view(self, jugador_id):
+        self.actualizar_torneo()       
 
+        jugadores = self.jugadores
+        jugador = next((e for e in jugadores if e["id"] == jugador_id), None)
 
-    def show_edit_view(self, equipo_id):
-        if not self.torneo:
-            self.torneo = {"nombre":self.name_var.get()}            
+        if not jugador:
+            return
+        
+        for widget in self.frame.winfo_children():
+                widget.destroy()
+
+        JugadorFormView(
+            parent=self.frame,
+            on_save=lambda nombre, puntos, id : self.on_save_jugador_edit(nombre, puntos, id),
+            initial_name=jugador["nombre"],
+            initial_points=jugador["puntos"],
+            jugador_id=jugador["id"]
+        )
+
+    def show_equipo_edit_view(self, equipo_id):
+        self.actualizar_torneo()       
 
         equipos = self.equipos
         equipo = next((e for e in equipos if e["id"] == equipo_id), None)
@@ -56,151 +263,43 @@ class TorneoFormView:
 
         EquipoFormView(
             self.frame,
-            get_jugadores(),
+            self.jugadores,
             equipo=equipo,
-            on_save=lambda nombre, jugadores, lider: self.on_save_edit(
+            on_save=lambda nombre, jugadores, lider: self.on_save_equipo_edit(
                 equipo["id"], nombre, jugadores, lider
             ),
         ) 
 
-    def __init__(self, parent, equipos, torneo=None, on_save=None):
-        self.parent = parent
-        self.frame = Frame(parent, bg="#EDEDED")
-        self.torneo = torneo
-        self.frame.place(relx=0, rely=0, relwidth=1, relheight=1)
-        self.equipos = equipos
+    def mostrar_equipos(self):
+        self.mostrar_equipo = not self.mostrar_equipo
+        self.selected.clear()
+        self.seleccion_tabla()
 
-        self.selected_equipos = set()
-        self.equipo_vars = {}                
+    def seleccion_tabla(self):
+        self.canvas.yview_moveto(0)
 
-        self.__show_list()
-
-
-    def __show_list(self):
-        for widget in self.frame.winfo_children():
-                widget.destroy()
-
-
-        header_bg = Frame(self.frame, bg="#F6F6F6")
-        header_bg.pack(fill="x", padx=0, pady=(0, 0))
-        titulo = "Editar torneo" if self.torneo else "Crear torneo"
-        Label(
-            header_bg,
-            text=titulo,
-            font=("Consolas", 28, "bold"),
-            bg="#F6F6F6",
-            fg="#222",
-            anchor="w",
-        ).pack(fill="x", padx=60, pady=(36, 18))
-
-        Frame(self.frame, height=18, bg="#EDEDED").pack()
-
-        card_w, card_h = 900, 520
-        card = Frame(self.frame, bg="white", width=card_w, height=card_h)
-        card.place(x=60, y=120)
-        card.pack_propagate(False)
-        input_frame = Frame(card, bg="white", width=card_w, height=200)
-        input_frame.pack(fill="x")
-        Label(
-            input_frame,
-            text="Nombre del equipo",
-            font=("Consolas", 14, "bold"),
-            bg="white",
-            fg="#1A1832",
-            anchor="w",
-        ).grid(column=0, row=0, padx=20, pady=(30, 6))        
-        Label(
-            input_frame,
-            text="Fecha de Inicio",
-            font=("Consolas", 14, "bold"),
-            bg="white",
-            fg="#1A1832",
-            anchor="w",
-        ).grid(column=1, row=0, padx=20, pady=(30, 6))
-        Label(
-            input_frame,
-            text="Fecha de Fin",
-            font=("Consolas", 14, "bold"),
-            bg="white",
-            fg="#1A1832",
-            anchor="w",
-        ).grid(column=2, row=0, padx=20, pady=(30, 6))
-
-        self.name_var = StringVar(value=self.torneo["nombre"] if self.torneo else "")
-        StyledEntry(
-            input_frame,
-            textvariable=self.name_var,
-            font=("Consolas", 12),
-            placeholder="Nombre del torneo...",
-            border_radius=16,
-            width=350
-        ).grid(column=0, row=1,padx=20, pady=(0, 24))
-
-        self.inicio = StringVar(value=self.torneo["inicio"] if self.torneo else "")
-        StyledEntry(
-            input_frame,
-            textvariable=self.inicio,
-            font=("Consolas", 12),
-            placeholder="DD/MM/YYYY",
-            border_radius=16,
-            width=200
-        ).grid(column=1, row=1,padx=20, pady=(0, 24))
-
-        self.fin = StringVar(value=self.torneo["fin"] if self.torneo else "")
-        StyledEntry(
-            input_frame,
-            textvariable=self.fin,
-            font=("Consolas", 12),
-            placeholder="DD/MM/YYYY",
-            width=200,
-            border_radius=16,
-        ).grid(column=2, row=1,padx=20, pady=(0, 24))
-
-        Label(
-            card,
-            text="Equipos",
-            font=("Consolas", 22, "bold"),
-            bg="white",
-            fg="#888",
-            anchor="w",
-        ).pack(fill="x", padx=20, pady=(0, 10))
-
-
-        equipos_frame_container = Frame(card, bg="white")
-        equipos_frame_container.pack(fill="both", padx=20, pady=(0, 24), expand=True)
-        canvas = Canvas(
-            equipos_frame_container, bg="white", highlightthickness=0, height=220
-        )
-        canvas.pack(side="left", fill="both", expand=True)
-        scrollbar = Scrollbar(
-            equipos_frame_container, orient="vertical", command=canvas.yview
-        )
-        scrollbar.pack(side="right", fill="y")
-        canvas.configure(yscrollcommand=scrollbar.set)
-        equipos_frame = Frame(canvas, bg="white")
-        canvas.create_window((0, 0), window=equipos_frame, anchor="nw")
-
-        def on_configure(event):
-            canvas.configure(scrollregion=canvas.bbox("all"))
-
-        equipos_frame.bind("<Configure>", on_configure)
-        canvas.bind_all(
-            "<MouseWheel>",
-            lambda event: canvas.yview_scroll(int(-1 * (event.delta / 120)), "units"),
-        )
+        self.curr_selec.configure(text="Equipos" if self.mostrar_equipo else "Jugadores")
+        self.op_selec.set_text("Un Jugador" if self.mostrar_equipo else "Por Equipos")
 
         def toggle_equipo(jid):
             if self.equipo_vars[jid].get():
-                self.selected_equipos.add(jid)
+                self.selected.add(jid)
             else:
-                self.selected_equipos.discard(jid)                
+                self.selected.discard(jid)                
 
-        for idx, equipo in enumerate(self.equipos):
+        
+        self.data = self.equipos if self.mostrar_equipo else self.jugadores
+
+        for widget in self.data_frame.winfo_children():
+            widget.destroy()
+
+
+        for idx, equipo in enumerate(self.data):
             col = idx % 3
             row = idx // 3
             # Card con borde redondeado
             card_j = Canvas(
-                equipos_frame, width=250, height=80, bg="white", highlightthickness=0
+                self.data_frame, width=250, height=80, bg="white", highlightthickness=0
             )
             card_j.grid(row=row, column=col, padx=12, pady=10)
             # Dibuja fondo redondeado
@@ -248,7 +347,7 @@ class TorneoFormView:
             ).pack(anchor="w", padx=0, pady=(0, 2))
             btns = Frame(content, bg="#FAFAFA")
             btns.pack(anchor="w", pady=(0, 0))
-            var = IntVar(value=1 if equipo["id"] in self.selected_equipos else 0)
+            var = IntVar(value=1 if equipo["id"] in self.selected else 0)
             self.equipo_vars[equipo["id"]] = var
             chk = Checkbutton(
                 btns,
@@ -268,12 +367,185 @@ class TorneoFormView:
                     bg="#EEE",
                     fg="#688CCA",
                     hover_bg="#DDD",
-                    command=lambda id = id : self.show_edit_view(id)
+                    command=lambda id = id : (self.show_equipo_edit_view(id) if self.mostrar_equipo else self.show_jugador_edit_view(id))
                 )
                 return btn
 
             action_button(equipo["id"], btns, "Editar").pack(side="left", padx=(8, 0))
 
+    def __init__(self, parent, jugadores, equipos, on_save):
+        self.parent = parent
+        self.frame = Frame(parent, bg="#EDEDED")
+        self.torneo = None
+        self.frame.place(relx=0, rely=0, relwidth=1, relheight=1)
+        self.equipos = equipos
+        self.jugadores = jugadores
+
+        self.mostrar_equipo = True
+
+        self.volver = on_save
+
+        self.selected = set()
+        self.equipo_vars = {}                
+
+        self.__show_list()
+
+
+    def __show_list(self):
+        for widget in self.frame.winfo_children():
+                widget.destroy()
+
+
+        header_bg = Frame(self.frame, bg="#F6F6F6")
+        header_bg.pack(fill="x", padx=0, pady=(0, 0))
+        titulo = "Crear torneo"
+        Label(
+            header_bg,
+            text=titulo,
+            font=("Consolas", 28, "bold"),
+            bg="#F6F6F6",
+            fg="#222",
+            anchor="w",
+        ).pack(fill="x", padx=60, pady=(36, 18))
+
+        Frame(self.frame, height=18, bg="#EDEDED").pack()
+
+        card_w, card_h = 900, 560
+        card = Frame(self.frame, bg="white", width=card_w, height=card_h)
+        card.place(x=60, y=120)
+        card.pack_propagate(False)
+        input_frame = Frame(card, bg="white", width=card_w, height=200)
+        input_frame.pack(fill="x")
+        input_frame.columnconfigure([0, 1], weight=1)
+        Label(
+            input_frame,
+            text="Nombre del Torneo",
+            font=("Consolas", 14, "bold"),
+            bg="white",
+            fg="#1A1832",
+            anchor="w",
+        ).grid(column=0, row=0, padx=20, pady=(30, 6), sticky="WE")        
+        
+        self.name_var = StringVar(value=self.torneo["nombre"] if self.torneo else "")
+        StyledEntry(
+            input_frame,
+            textvariable=self.name_var,
+            font=("Consolas", 12),
+            placeholder="Nombre del torneo...",
+            border_radius=16,
+            width=350
+        ).grid(column=0, row=1, padx=20, pady=(0, 24), sticky="WE")
+
+        self._on_mousewheel_callback = lambda e: _on_mouse_wheel(e)
+        self.juego_selec = StringVar(value=self.torneo["juego"] if self.torneo else "")
+        combo = StyledCombobox(
+            parent=input_frame,
+            values=[str(i) for i in range(100)],
+            textvariable=self.juego_selec,
+            placeholder=self.juego_selec.get() if self.torneo else "Videojuego",
+            width=200,        
+            height=30,
+            mousewheel_callback=self._on_mousewheel_callback,            
+        ).grid(column=1, row=1, sticky="EW")
+
+        Label(
+            input_frame,
+            text="VideoJuego",
+            font=("Consolas", 14, "bold"),
+            bg="white",
+            fg="#1A1832",
+            anchor="w",
+        ).grid(column=1, row=0, padx=20, pady=(0, 24), sticky="EW")
+
+        selec_tabla_frame = Frame(card, bg="white", width=card_w)
+        selec_tabla_frame.pack(fill="x")
+        self.curr_selec = Label(
+            selec_tabla_frame,
+            text="Equipos",
+            font=("Consolas", 22, "bold"),
+            bg="white",
+            fg="#888",
+            anchor="w",
+        )
+        self.curr_selec.pack(padx=20, pady=(0, 10), side="left")
+        self.op_selec = RoundedButton(
+            selec_tabla_frame,
+            text="Un solo jugador",
+            font=("Consolas", 16, "bold"),            
+            command=self.mostrar_equipos
+        )
+        self.op_selec.pack(padx=20, pady=(0, 10), side="left")
+        
+        fechas_frame = Frame(selec_tabla_frame, bg="white")
+        fechas_frame.pack(side="right")
+
+        Label(
+            fechas_frame,
+            text="Fecha de Inicio",
+            font=("Consolas", 14, "bold"),
+            bg="white",
+            fg="#1A1832",
+            anchor="w",
+        ).grid(column=0, row=0, padx=20, pady=(30, 6))
+        Label(
+            fechas_frame,
+            text="Fecha de Fin",
+            font=("Consolas", 14, "bold"),
+            bg="white",
+            fg="#1A1832",
+            anchor="w",
+        ).grid(column=1, row=0, padx=20, pady=(30, 6))
+
+        self.inicio = StringVar(value=self.torneo["inicio"] if self.torneo else "")
+        StyledEntry(
+            fechas_frame,
+            textvariable=self.inicio,
+            font=("Consolas", 12),
+            placeholder="DD/MM/YYYY",
+            border_radius=16,
+            width=200
+        ).grid(column=0, row=1,padx=20, pady=(0, 24))
+
+        self.fin = StringVar(value=self.torneo["fin"] if self.torneo else "")
+        StyledEntry(
+            fechas_frame,
+            textvariable=self.fin,
+            font=("Consolas", 12),
+            placeholder="DD/MM/YYYY",
+            width=200,
+            border_radius=16,
+        ).grid(column=1, row=1,padx=20, pady=(0, 24))
+
+        
+        
+        data_frame_container = Frame(card, bg="white")
+        data_frame_container.pack(fill="both", padx=20, expand=True)
+        self.canvas = Canvas(
+            data_frame_container, bg="white", highlightthickness=0, height=220
+        )
+        self.canvas.pack(side="left", fill="both", expand=True)
+        scrollbar = Scrollbar(
+            data_frame_container, orient="vertical", command=self.canvas.yview
+        )
+        scrollbar.pack(side="right", fill="y")
+        self.canvas.configure(yscrollcommand=scrollbar.set)
+        self.data_frame = Frame(self.canvas, bg="white")
+        self.canvas.create_window((0, 0), window=self.data_frame, anchor="nw")
+
+        def on_configure(event):
+            self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+
+        self.data_frame.bind("<Configure>", on_configure)
+
+
+        def _on_mouse_wheel(e):    
+            if not hasattr(self, 'combo') or not hasattr(self.combo, 'dropdown') or not self.combo.dropdown:
+                self.canvas.yview_scroll(int(-1*(e.delta/120)), "units")
+        
+        self.canvas.bind_all("<MouseWheel>", self._on_mousewheel_callback)
+
+        self.seleccion_tabla()
+        
         RoundedButton(
             card,
             text="Guardar",
@@ -281,5 +553,5 @@ class TorneoFormView:
             height=44,
             radius=18,
             font=("Consolas", 13, "bold"),
-            command=None            
-        ).pack(pady=(30, 0))
+            command=self.on_save            
+        ).pack()

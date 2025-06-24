@@ -2,15 +2,14 @@ from tkinter import *
 import os
 from ui.elements import RoundedButton, AlertDialog, ConfirmDialog
 from ui.views.welcome import WelcomeView
-from ui.views.torneos import TorneoFormView, TorneoView
+from ui.views.torneos import TorneoFormView, TorneoView, TorneoEdit
 from ui.views.equipo import EquipoView
 from ui.views.jugadores import JugadoresView, JugadorFormView, JugadorFormViewNoEdit
 import sys
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "mocks"))
-from ui.mocks import get_jugadores, create_jugador, update_jugador, delete_jugador, get_equipos
-#@20220270 todas estas funciones son operaciones q deberia hacer la base de datos
-#Estan en ui/mocks/__init__.py
+from ui.mocks import get_jugadores, create_jugador, update_jugador, delete_jugador, get_equipos, get_torneos, update_torneo
+
 
 WINDOW_WIDTH = 1200
 WINDOW_HEIGHT = 720
@@ -87,18 +86,23 @@ class MainWindow:
         if view_name == "welcome":
             WelcomeView(main_frame, self)
         elif view_name == "torneo":
-            TorneoView(main_frame, lambda : self.show_view("torneo_form"), lambda torneo_id : self.show_view("torneo_form", torneo_id=torneo_id))            
-        elif view_name == "torneo_form":
-            #si torneo_id not None buscar torneo y pasarlo
-            TorneoFormView(main_frame, get_equipos()) #@20220270 aca se pasan todos los equipos
-            #para poder activar y desactivar q sean parte de un torneo y eso XD              
+            TorneoView(main_frame, on_crear_torneo=lambda : self.show_view("torneo_form"), on_editar_torneo=lambda torneo_id : self.show_view("torneo_edit", torneo_id=torneo_id))            
+        elif view_name == "torneo_form":            
+            TorneoFormView(main_frame, get_jugadores(), get_equipos(), lambda : self.show_view("torneo"))   
+        elif view_name == "torneo_edit":
+            torneos = get_torneos()
+            if torneo_id is None:
+                self.show_view("torneo")
+            
+            torneo = next((j for j in torneos if j["id"] == torneo_id), None)          
+            def on_save_torneo(torneo):
+                update_torneo(torneo)
+                self.show_view("torneo")
+            TorneoEdit(main_frame, torneo, on_save=on_save_torneo)
         elif view_name == "equipo":
             EquipoView(main_frame)        
         elif view_name == "jugadores":
-            jugadores = get_jugadores()#@20220270 se agarra todos los jugadores para despues
-            #solo pasarlos a la clase JugadoresView, donde se crea la tabla de los jugadores
-            #en ui/views/jugadores/jugador_create.py
-
+            jugadores = get_jugadores()            
             def on_eliminar_jugador(jugador_id):
                 def do_delete():
                     delete_jugador(jugador_id)
@@ -127,7 +131,7 @@ class MainWindow:
             )
         elif view_name == "jugador_form_no_edit":
             jugadores = get_jugadores()
-            jugador = None #@20220270 Aca se busca un jugador (el id del jugador esta en jugador_id)
+            jugador = None 
             if jugador_id is None: #quien muesta errores en 2025???? smh
                 self.show_view("jugadores")
                 
@@ -136,8 +140,8 @@ class MainWindow:
 
         elif view_name == "jugador_form":
             jugadores = get_jugadores()
-            jugador = None #@20220270 Aca se busca un jugador (el id del jugador esta en jugador_id)
-            #igual solo se usa para pasarle el nombre al JugadorFormView (donde se edita al jugador)
+            jugador = None 
+            
             if jugador_id is not None:
                 jugador = next((j for j in jugadores if j["id"] == jugador_id), None)
 

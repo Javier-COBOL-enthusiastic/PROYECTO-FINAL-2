@@ -12,12 +12,12 @@
                 "es_lider": false
             },
             {
-                "id_jugador": 23,
-                "es_lider": true
-            },
-            {
                 "id_jugador": 33,
                 "es_lider": false
+            },
+            {
+                "id_jugador": 23,
+                "es_lider": true
             }
         ]
     },

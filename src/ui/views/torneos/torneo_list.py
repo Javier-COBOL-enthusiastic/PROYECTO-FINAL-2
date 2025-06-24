@@ -4,6 +4,8 @@ import os
 from tkinter import PhotoImage
 from ui.elements import RoundedButton
 
+from ui.mocks import get_torneos
+
 
 def draw_rounded_rect(canvas, x1, y1, x2, y2, r, fill, outline, width=1):
     # Arcos de las esquinas
@@ -198,12 +200,12 @@ class TorneoView:
             anchor="n", padx=40, pady=(0, 0), fill=None, expand=False
         )
 
-        headers = ["ID", "Torneo", "Inicio", "Fin", "Estado", ""] 
-        #@20220270 aca deberia ir la llamada a todos los torneos pq aca se hace la tabla
-        data = [
-            [f"{i:02}", f"Torneo {i}", "01/01/24", "05/01/24", "Pendiente"]
-            for i in range(1, 10)
-        ]
+        headers = ["ID", "Torneo", "Inicio", "Fin", ""] 
+        
+        data = []
+        for torneo in  get_torneos():
+            data.append([torneo["id"], torneo["nombre"],
+                        torneo["inicio"], torneo["fin"]])
 
         def action_buttons(row, parent, text):
             btn_frame = Frame(parent, bg=parent["bg"])
@@ -218,7 +220,7 @@ class TorneoView:
                 btn_frame,
                 icon_path="assets/images/delete.png",
                 command=lambda: (
-                    on_eliminar_torneo(row[0]) if on_eliminar_torneo else None
+                    on_eliminar_torneo(row[0]) if on_eliminar_torneo else None                
                 )
             ).pack(side="left", padx=(0, 8))
             TableActionButton(
