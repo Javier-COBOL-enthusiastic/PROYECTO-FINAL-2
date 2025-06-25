@@ -35,6 +35,8 @@ class TorneoFormView:
             )
             return
 
+        if(len(self.clean_data) > 34):
+            AlertDialog(self.parent.winfo_toplevel(), "El nombre del torneo es muy largo.", success=False, on_close=self.__show_list)
 
         if(len(self.clean_data[-1]) == 0): 
             AlertDialog(

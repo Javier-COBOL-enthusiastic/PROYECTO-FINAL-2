@@ -153,6 +153,11 @@ class EquipoView:
                 self.parent.winfo_toplevel(), "El nombre del equipo no puede estar vacío.", success=False
             )
             return
+        if len(nombre) > 28:
+            AlertDialog(
+                self.parent.winfo_toplevel(), "El nombre del equipo es muy largo.", success=False
+            )
+            return
         if not jugadores:
             AlertDialog(self.parent.winfo_toplevel(), "Selecciona al menos un jugador.", success=False)
             return
@@ -178,6 +183,11 @@ class EquipoView:
         if not nombre.strip():
             AlertDialog(
                 self.parent.winfo_toplevel(), "El nombre del equipo no puede estar vacío.", success=False
+            )
+            return
+        if len(nombre) > 28:
+            AlertDialog(
+                self.parent.winfo_toplevel(), "El nombre del equipo es muy largo.", success=False
             )
             return
         if not jugadores:

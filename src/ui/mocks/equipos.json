@@ -77,15 +77,15 @@
     },
     {
         "id": 6,
-        "nombre": "kjshdkjashdkjgasdkjashdkagsjdfijdwkjfgadskjfhdkjewbdjcewnkcnbhjwevfckjewfckjsfkjabdfkj",
+        "nombre": "12345678901234567890123456789",
         "jugadores": [
-            {
-                "id_jugador": 1,
-                "es_lider": true
-            },
             {
                 "id_jugador": 26,
                 "es_lider": false
+            },
+            {
+                "id_jugador": 30,
+                "es_lider": true
             }
         ]
     }

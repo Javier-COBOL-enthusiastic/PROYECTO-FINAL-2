@@ -236,7 +236,12 @@ class MainWindow:
                 if not nombre or nombre == "" or nombre == "Nombre del jugador...":
                     self.show_alert(self.root, "El nombre no puede estar vacío", success=False)
                     return
-                nombre_lower = nombre.lower()
+                if len(nombre) > 29:
+                    AlertDialog(
+                        self.root, "El nombre del jugador es muy largo.", success=False
+                    )
+                    return
+                nombre_lower = nombre.lower()                
                 for j in jugadores:
                     if j["nombre"].lower() == nombre_lower:
                         self.show_alert(self.root, "Ya existe un jugador con ese nombre", success=False)
@@ -252,6 +257,11 @@ class MainWindow:
                 nombre = nombre.strip()
                 if not nombre or nombre == "" or nombre == "Nombre del jugador...":
                     self.show_alert(self.root, "El nombre no puede estar vacío", success=False)
+                    return
+                if len(nombre) > 28:
+                    AlertDialog(
+                        self.root, "El nombre del jugador es muy largo.", success=False
+                    )
                     return
                 nombre_lower = nombre.lower()
                 for j in jugadores:
@@ -271,7 +281,14 @@ class MainWindow:
                 else:
                     crear_jugador(nombre, puntos)
 
-            JugadorFormView(main_frame, jugador, on_save)
+            JugadorFormView(
+                main_frame,
+                on_save=lambda nombre, puntos, id: on_save(nombre, puntos, id, jugador_id is not None),
+                initial_name=jugador["nombre"] if jugador else "",
+                initial_points=jugador["puntos"] if jugador else 0,
+                jugador_id=jugador_id,
+            )
+
 
     def run(self):
         """
