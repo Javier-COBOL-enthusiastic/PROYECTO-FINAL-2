@@ -912,7 +912,7 @@ class StyledCombobox(Frame):
         self.canvas.itemconfig(self.flecha, fill="#688CCA")
         if self._on_mousewheel_callback is not None:
             self._mousewheel_callback = self.winfo_toplevel().bind("<MouseWheel>")
-            self.winfo_toplevel().unbind("<MouseWheel>")
+            self.winfo_toplevel().bind("<MouseWheel>", None)
 
         self.dropdown_frame = Frame(
             self.winfo_toplevel(),

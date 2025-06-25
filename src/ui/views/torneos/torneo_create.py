@@ -442,7 +442,7 @@ class TorneoFormView:
 
         self._on_mousewheel_callback = lambda e: _on_mouse_wheel(e)
         self.juego_selec = StringVar(value=self.torneo["juego"] if self.torneo else "")
-        combo = StyledCombobox(
+        self.combo = StyledCombobox(
             parent=input_frame,
             values=[str(i) for i in range(100)],
             textvariable=self.juego_selec,
