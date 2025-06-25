@@ -1,3 +1,9 @@
+"""
+Elementos de interfaz de usuario personalizados
+Este módulo contiene componentes de UI reutilizables como botones redondeados,
+tablas, campos de entrada estilizados y diálogos personalizados.
+"""
+
 from tkinter import *
 from tkinter import ttk
 from tkinter import Canvas
@@ -6,6 +12,18 @@ import os
 
 
 def draw_rounded_rect(canvas, x1, y1, x2, y2, r, fill, outline, width=1):
+    """
+    Función auxiliar para dibujar rectángulos con esquinas redondeadas en un canvas
+    
+    Args:
+        canvas: Canvas donde dibujar
+        x1, y1: Coordenadas de la esquina superior izquierda
+        x2, y2: Coordenadas de la esquina inferior derecha
+        r: Radio de las esquinas redondeadas
+        fill: Color de relleno
+        outline: Color del borde
+        width: Grosor del borde
+    """
     # Arcos de las esquinas
     canvas.create_arc(
         x1,
@@ -70,7 +88,20 @@ def draw_rounded_rect(canvas, x1, y1, x2, y2, r, fill, outline, width=1):
 
 
 class MenuButton(Button):
+    """
+    Botón personalizado para menús con efectos hover
+    """
     def __init__(self, master, text, command=None, font=None, **kwargs):
+        """
+        Constructor del botón de menú
+        
+        Args:
+            master: Widget padre
+            text: Texto del botón
+            command: Función a ejecutar al hacer clic
+            font: Fuente del texto
+            **kwargs: Argumentos adicionales para el botón
+        """
         super().__init__(
             master,
             text=text,
@@ -85,17 +116,23 @@ class MenuButton(Button):
             **kwargs,
         )
 
+        # Vincular eventos de hover
         self.bind("<Enter>", self.on_enter)
         self.bind("<Leave>", self.on_leave)
 
     def on_enter(self, e):
+        """Cambia el color de fondo al pasar el mouse"""
         self["background"] = "#5A7BB8"
 
     def on_leave(self, e):
+        """Restaura el color de fondo al salir el mouse"""
         self["background"] = "#688CCA"
 
 
 class RoundedButton(Canvas):
+    """
+    Botón personalizado con esquinas redondeadas y efectos de hover
+    """
     def __init__(
         self,
         parent,
@@ -110,6 +147,22 @@ class RoundedButton(Canvas):
         command=None,
         **kwargs,
     ):
+        """
+        Constructor del botón redondeado
+        
+        Args:
+            parent: Widget padre
+            text: Texto del botón
+            width: Ancho del botón
+            height: Alto del botón
+            radius: Radio de las esquinas redondeadas
+            bg: Color de fondo
+            fg: Color del texto
+            font: Fuente del texto
+            hover_bg: Color de fondo al hacer hover
+            command: Función a ejecutar al hacer clic
+            **kwargs: Argumentos adicionales
+        """
         super().__init__(
             parent,
             width=width,
@@ -125,12 +178,16 @@ class RoundedButton(Canvas):
         self.hover_bg = hover_bg
         self.command = command
         self.font = font
+        
+        # Dibujar el botón redondeado
         self.btn_id = self._draw_rounded_rect(
             5, 5, width - 5, height - 5, radius, fill=bg, outline=""
         )
         self.text_id = self.create_text(
             width // 2, height // 2, text=text, fill=fg, font=font
         )
+        
+        # Vincular eventos
         self.bind("<Enter>", self._on_enter)
         self.bind("<Leave>", self._on_leave)
         self.tag_bind(self.btn_id, "<Enter>", self._on_enter)
@@ -142,6 +199,18 @@ class RoundedButton(Canvas):
         self.tag_bind(self.text_id, "<ButtonRelease-1>", self._on_click)
 
     def _draw_rounded_rect(self, x1, y1, x2, y2, r, **kwargs):
+        """
+        Dibuja un rectángulo redondeado en el canvas
+        
+        Args:
+            x1, y1: Coordenadas de la esquina superior izquierda
+            x2, y2: Coordenadas de la esquina inferior derecha
+            r: Radio de las esquinas
+            **kwargs: Propiedades adicionales del polígono
+            
+        Returns:
+            ID del polígono creado
+        """
         points = [
             x1 + r,
             y1,
@@ -171,12 +240,15 @@ class RoundedButton(Canvas):
         return self.create_polygon(points, smooth=True, **kwargs)
 
     def _on_enter(self, e):
+        """Efecto al entrar el mouse"""
         self._animate_color(self.bg, self.hover_bg)
 
     def _on_leave(self, e):
+        """Efecto al salir el mouse"""
         self._animate_color(self.itemcget(self.btn_id, "fill"), self.bg)
 
     def _on_click(self, e):
+        """Maneja el evento de clic"""
         if self.command and not self.clicked:
             self.clicked = True
             self.command()
@@ -185,7 +257,17 @@ class RoundedButton(Canvas):
             self.clicked = False
 
     def _animate_color(self, from_color, to_color, steps=8, step=0):
+        """
+        Anima la transición de color del botón
+        
+        Args:
+            from_color: Color inicial
+            to_color: Color final
+            steps: Número de pasos para la animación
+            step: Paso actual de la animación
+        """
         def hex_to_rgb(h):
+            """Convierte color hexadecimal a RGB"""
             if not isinstance(h, str) or not h.startswith("#") or len(h) != 7:
                 # Si no es un color hex válido, regresa color blanco o el bg
                 return (255, 255, 255)
@@ -195,6 +277,7 @@ class RoundedButton(Canvas):
                 return (255, 255, 255)
 
         def rgb_to_hex(rgb):
+            """Convierte color RGB a hexadecimal"""
             return "#%02x%02x%02x" % rgb
 
         # Si el color no es válido, no animar
@@ -227,9 +310,18 @@ class RoundedButton(Canvas):
             )
 
     def set_text(self, text):
+        """Cambia el texto del botón"""
         self.itemconfig(self.text_id, text=text)
 
     def set_colors(self, bg=None, fg=None, hover_bg=None):
+        """
+        Cambia los colores del botón
+        
+        Args:
+            bg: Color de fondo
+            fg: Color del texto
+            hover_bg: Color de fondo al hacer hover
+        """
         if bg:
             self.bg = bg
             self.itemconfig(self.btn_id, fill=bg)
@@ -241,7 +333,21 @@ class RoundedButton(Canvas):
 
 
 class TableActionButton(Canvas):
+    """
+    Botón de acción para tablas con icono y efectos hover
+    Se usa para botones de editar, eliminar, ver, etc. en las tablas
+    """
     def __init__(self, parent, icon_path, command=None, size=32, **kwargs):
+        """
+        Constructor del botón de acción
+        
+        Args:
+            parent: Widget padre
+            icon_path: Ruta al archivo de icono
+            command: Función a ejecutar al hacer clic
+            size: Tamaño del botón (cuadrado)
+            **kwargs: Argumentos adicionales
+        """
         super().__init__(
             parent,
             width=size,
@@ -258,6 +364,8 @@ class TableActionButton(Canvas):
         self.size = size
         self.bg_normal = parent["bg"]
         self.bg_hover = "#e0e0e0"
+        
+        # Vincular eventos
         self.bind("<Enter>", self._on_enter)
         self.bind("<Leave>", self._on_leave)
         self.bind("<Button-1>", self._on_click)
@@ -266,12 +374,15 @@ class TableActionButton(Canvas):
         self.tag_bind(self.icon_id, "<Button-1>", self._on_click)
 
     def _on_enter(self, e):
+        """Cambia el color de fondo al entrar el mouse"""
         self.configure(bg=self.bg_hover)
 
     def _on_leave(self, e):
+        """Restaura el color de fondo al salir el mouse"""
         self.configure(bg=self.bg_normal)
 
     def _on_click(self, e):
+        """Maneja el evento de clic"""
         if self.command and not self.clicked:
             self.clicked = True
             self.command()
@@ -281,6 +392,10 @@ class TableActionButton(Canvas):
 
 
 class TableView(Frame):
+    """
+    Componente de tabla personalizada con diseño moderno
+    Permite mostrar datos en formato de tabla con acciones personalizables
+    """
     def __init__(
         self,
         parent,
@@ -299,6 +414,26 @@ class TableView(Frame):
         card_h=350,
         **kwargs,
     ):
+        """
+        Constructor de la tabla
+        
+        Args:
+            parent: Widget padre
+            headers: Lista de encabezados de columnas
+            data: Lista de datos a mostrar
+            actions: Lista de acciones disponibles para cada fila
+            title: Título de la tabla
+            subtitle: Subtítulo de la tabla
+            count: Número total de elementos
+            col_widths: Anchos de las columnas
+            action_text: Texto para el botón de acción
+            anchor_cols: Alineación de las columnas
+            button_text: Texto del botón principal
+            button_command: Función del botón principal
+            card_w: Ancho de la tarjeta
+            card_h: Alto de la tarjeta
+            **kwargs: Argumentos adicionales
+        """
         super().__init__(parent, bg="#EDEDED", **kwargs)
         self.headers = headers
         self.data = data
@@ -316,6 +451,9 @@ class TableView(Frame):
         self._build_table()
 
     def _build_table(self):
+        """
+        Construye la interfaz de la tabla
+        """
         card_w, card_h = self.card_w, self.card_h
         card = Frame(self, bg="#EDEDED", width=card_w, height=card_h)
         card.pack(padx=0, pady=0, fill="both", expand=True)
@@ -333,6 +471,7 @@ class TableView(Frame):
         )
         card_content = Frame(canvas, bg="white")
         card_content.place(x=0, y=0, width=card_w, height=card_h)
+        
         # Header con título, pill y botón
         if self.title or self.count is not None or self.button_text:
             title_row = Frame(card_content, bg="white")
@@ -475,6 +614,10 @@ class TableView(Frame):
 
 
 class StyledEntry(Frame):
+    """
+    Campo de entrada personalizado con esquinas redondeadas y placeholder
+    Proporciona una interfaz moderna para la entrada de texto
+    """
     def __init__(
         self,
         parent,
@@ -485,8 +628,22 @@ class StyledEntry(Frame):
         border_radius=12,
         **kwargs,
     ):
+        """
+        Constructor del campo de entrada estilizado
+        
+        Args:
+            parent: Widget padre
+            textvariable: Variable de texto de Tkinter
+            width: Ancho del campo
+            font: Fuente del texto
+            placeholder: Texto de placeholder
+            border_radius: Radio de las esquinas redondeadas
+            **kwargs: Argumentos adicionales
+        """
         super().__init__(parent, bg="white")
         self.border_radius = border_radius
+        
+        # Crear canvas para el fondo redondeado
         self.canvas = Canvas(
             self, bg="white", highlightthickness=0, width=width, height=48
         )
@@ -494,6 +651,8 @@ class StyledEntry(Frame):
         self._draw_rounded_rect(
             6, 6, width-6, 42, border_radius, fill="#F6F6F6", outline="#D5D4DC"
         )
+        
+        # Crear el campo de entrada
         self.entry = Entry(
             self,
             textvariable=textvariable,
@@ -506,14 +665,20 @@ class StyledEntry(Frame):
             **kwargs,
         )
         self.entry.place(x=18, y=14, width=width - 40, height=26)
+        
+        # Configurar el frame
         self.config(
             highlightbackground="#D5D4DC",
             highlightcolor="#688CCA",
             highlightthickness=0,
             bd=0,
         )
+        
+        # Vincular eventos de focus
         self.entry.bind("<FocusIn>", self._on_focus_in)
         self.entry.bind("<FocusOut>", self._on_focus_out)
+        
+        # Configurar placeholder
         self.placeholder = placeholder
         self.textvariable = textvariable
         if placeholder and (not textvariable or not textvariable.get()):
@@ -522,6 +687,18 @@ class StyledEntry(Frame):
         self.entry.bind("<FocusOut>", self._restore_placeholder)
 
     def _draw_rounded_rect(self, x1, y1, x2, y2, r, **kwargs):
+        """
+        Dibuja un rectángulo redondeado en el canvas
+        
+        Args:
+            x1, y1: Coordenadas de la esquina superior izquierda
+            x2, y2: Coordenadas de la esquina inferior derecha
+            r: Radio de las esquinas
+            **kwargs: Propiedades adicionales del polígono
+            
+        Returns:
+            ID del polígono creado
+        """
         points = [
             x1 + r,
             y1,
@@ -551,36 +728,57 @@ class StyledEntry(Frame):
         return self.canvas.create_polygon(points, smooth=True, **kwargs)
 
     def _on_focus_in(self, event):
+        """Cambia el color del borde al obtener el foco"""
         self.canvas.itemconfig(1, outline="#688CCA")
 
     def _on_focus_out(self, event):
+        """Restaura el color del borde al perder el foco"""
         self.canvas.itemconfig(1, outline="#D5D4DC")
 
     def _set_placeholder(self, event=None):
+        """Establece el texto placeholder"""
         self.entry.delete(0, "end")
         self.entry.insert(0, self.placeholder)
         self.entry.config(fg="#888")
 
     def _clear_placeholder(self, event=None):
+        """Limpia el placeholder al obtener el foco"""
         if self.entry.get() == self.placeholder:
             self.entry.delete(0, "end")
             self.entry.config(fg="#222")
 
     def _restore_placeholder(self, event=None):
+        """Restaura el placeholder si el campo está vacío"""
         if not self.entry.get():
             self._set_placeholder()
 
     def get(self):
+        """
+        Obtiene el valor del campo, ignorando el placeholder
+        
+        Returns:
+            str: Valor del campo o cadena vacía si es el placeholder
+        """
         val = self.entry.get()
         if val == self.placeholder:
             return ""
         return val
 
     def set(self, value):
+        """
+        Establece el valor del campo
+        
+        Args:
+            value: Valor a establecer
+        """
         self.entry.delete(0, "end")
         self.entry.insert(0, value)
 
 class StyledCombobox(Frame):
+    """
+    Combobox personalizado con esquinas redondeadas y dropdown personalizado
+    Proporciona una interfaz moderna para selección de opciones
+    """
     def __init__(
         self,
         parent,
@@ -593,6 +791,20 @@ class StyledCombobox(Frame):
         border_radius=12,
         mousewheel_callback = None
     ):
+        """
+        Constructor del combobox estilizado
+        
+        Args:
+            parent: Widget padre
+            values: Lista de valores disponibles
+            textvariable: Variable de texto de Tkinter
+            width: Ancho del combobox
+            height: Alto del combobox
+            font: Fuente del texto
+            placeholder: Texto de placeholder
+            border_radius: Radio de las esquinas redondeadas
+            mousewheel_callback: Función callback para el scroll del mouse
+        """
         super().__init__(parent, bg="white")
         self.border_radius = border_radius
         self.width = width
@@ -604,6 +816,7 @@ class StyledCombobox(Frame):
         self._on_mousewheel_callback = mousewheel_callback
         self.dropdown_canvas = None
         
+        # Crear canvas para el fondo redondeado
         self.canvas = Canvas(
             self, 
             width=width, 
@@ -859,11 +1072,26 @@ class StyledCombobox(Frame):
 
 
 class AlertDialog(Frame):
+    """
+    Diálogo de alerta modal con diseño moderno
+    Se usa para mostrar mensajes de éxito o error al usuario
+    Implementa patrón singleton para evitar múltiples diálogos
+    """
     _instance = None  # Singleton para evitar múltiples diálogos
 
     def __init__(self, parent, message, success=True, on_close=None):
+        """
+        Constructor del diálogo de alerta
+        
+        Args:
+            parent: Widget padre
+            message: Mensaje a mostrar
+            success: Si es True muestra alerta de éxito, si es False muestra error
+            on_close: Función a ejecutar al cerrar el diálogo
+        """
         from ui.elements import RoundedButton
 
+        # Implementar patrón singleton
         if AlertDialog._instance is not None:
             try:
                 AlertDialog._instance.destroy()
@@ -889,7 +1117,7 @@ class AlertDialog(Frame):
         card.place(relx=0.5, rely=0.5, anchor="center")
         card.pack_propagate(False)
 
-        # Icono
+        # Icono según el tipo de alerta
         assets_path = os.path.join(os.path.dirname(__file__), "..", "assets", "images")
         icon_path = os.path.join(assets_path, "success.png" if success else "error.png")
         icon_img = PhotoImage(file=icon_path, format="png")
@@ -909,6 +1137,7 @@ class AlertDialog(Frame):
         msg_lbl.pack(pady=(18, 0), padx=24)
 
         def accept():
+            """Función para cerrar el diálogo"""
             AlertDialog._instance = None
             self.destroy()
             if on_close:
@@ -935,9 +1164,24 @@ class AlertDialog(Frame):
 
 
 class ConfirmDialog(Frame):
+    """
+    Diálogo de confirmación modal con diseño moderno
+    Se usa para pedir confirmación al usuario antes de realizar acciones críticas
+    """
     def __init__(
         self, parent, message, on_confirm=None, on_cancel=None, card_height=None, ops = ("Cancelar", "Eliminar")
     ):
+        """
+        Constructor del diálogo de confirmación
+        
+        Args:
+            parent: Widget padre
+            message: Mensaje a mostrar
+            on_confirm: Función a ejecutar al confirmar
+            on_cancel: Función a ejecutar al cancelar
+            card_height: Alto de la tarjeta
+            ops: Tupla con textos de los botones (cancelar, confirmar)
+        """
         from ui.elements import RoundedButton
 
         super().__init__(parent, bg="#000000")
@@ -959,7 +1203,7 @@ class ConfirmDialog(Frame):
         card.place(relx=0.5, rely=0.5, anchor="center")
         card.pack_propagate(False)
 
-        # Icono
+        # Icono de advertencia
         assets_path = os.path.join(os.path.dirname(__file__), "..", "assets", "images")
         icon_path = os.path.join(assets_path, "error.png")
         icon_img = PhotoImage(file=icon_path, format="png")
@@ -981,15 +1225,18 @@ class ConfirmDialog(Frame):
         btn_frame.pack(pady=(48, 0))
 
         def confirm():
+            """Función para confirmar la acción"""
             self.destroy()
             if on_confirm:
                 on_confirm()
 
         def cancel():
+            """Función para cancelar la acción"""
             self.destroy()
             if on_cancel:
                 on_cancel()
 
+        # Botones de confirmar y cancelar
         RoundedButton(
             btn_frame,
             text=ops[0],
@@ -997,11 +1244,11 @@ class ConfirmDialog(Frame):
             height=56,
             radius=22,
             font=("Consolas", 16, "bold"),
-            bg="#EEE",
-            fg="#222",
-            hover_bg="#DDD",
+            bg="#9FACE8",
+            fg="white",
+            hover_bg="#688CCA",
             command=cancel,
-        ).pack(side="left", padx=36)
+        ).pack(side="left", padx=12)
         RoundedButton(
             btn_frame,
             text=ops[1],
@@ -1013,7 +1260,7 @@ class ConfirmDialog(Frame):
             fg="white",
             hover_bg="#C62828",
             command=confirm,
-        ).pack(side="left", padx=36)
+        ).pack(side="left", padx=12)
 
         self.focus_set()
         self.bind("<Button-1>", lambda e: None)  # Captura clicks para evitar que pasen atrás
