@@ -9,7 +9,7 @@ class JugadorFormViewNoEdit:
 
         header_bg = Frame(frame, bg="#F6F6F6")
         header_bg.pack(fill="x", padx=0, pady=(0, 0))
-        titulo = f"Historal de {jugador["nombre"]}"
+        titulo = f"Historal de {jugador['nombre']}"
         Label(
             header_bg,
             text=titulo,

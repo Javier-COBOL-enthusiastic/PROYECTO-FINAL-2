@@ -9,7 +9,7 @@ class EquipoFormViewNoEdit:
 
         header_bg = Frame(frame, bg="#F6F6F6")
         header_bg.pack(fill="x", padx=0, pady=(0, 0))
-        titulo = f"Información de {equipo["nombre"]}"
+        titulo = f"Información de {equipo['nombre']}"
         Label(
             header_bg,
             text=titulo,

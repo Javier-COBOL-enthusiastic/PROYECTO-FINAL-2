@@ -74,7 +74,7 @@ class TorneoEdit:
         input_frame.columnconfigure([0, 1], weight=1)
         Label(
             input_frame,
-            text=f"Torneo {self.torneo["nombre"]}",
+            text=f"Torneo {self.torneo['nombre']}",
             font=("Consolas", 20, "bold"),
             bg="white",
             fg="#1A1832",
@@ -84,7 +84,7 @@ class TorneoEdit:
                         
         Label(
             input_frame,
-            text=f"VideoJuego: {self.torneo["juego"]}",
+            text=f"VideoJuego: {self.torneo['juego']}",
             font=("Consolas", 20, "bold"),
             bg="white",
             fg="#1A1832",
@@ -107,7 +107,7 @@ class TorneoEdit:
         ).pack(side="left", padx=20, pady=(0, 10))
         self.ronda_label = Label(
             rondas_frame,
-            text=f"{self.ronda + 1}° Ronda" if (self.ronda + 1) < len(self.torneo["rondas"]) else "Ronda Final",
+            text=f"{self.ronda + 1}° Ronda" if (self.ronda + 1) < len(self.torneo['rondas']) else "Ronda Final",
             font=("Consolas", 22, "bold"),
             bg="white",
             fg="#888",
@@ -131,7 +131,7 @@ class TorneoEdit:
 
         Label(
             fechas_frame,
-            text=f"Fecha de Inicio\n{self.torneo["inicio"]}",
+            text=f"Fecha de Inicio\n{self.torneo['inicio']}",
             font=("Consolas", 14, "bold"),
             bg="white",
             fg="#1A1832",
@@ -139,7 +139,7 @@ class TorneoEdit:
         ).grid(column=0, row=0, padx=20, pady=(30, 6))
         Label(
             fechas_frame,
-            text=f"Fecha de Fin\n{self.torneo["fin"]}",
+            text=f"Fecha de Fin\n{self.torneo['fin']}",
             font=("Consolas", 14, "bold"),
             bg="white",
             fg="#1A1832",
