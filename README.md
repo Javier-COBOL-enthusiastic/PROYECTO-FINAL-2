@@ -44,7 +44,7 @@ python src/main.py
 - **Python**: Lenguaje principal
 - **Tkinter**: Framework de interfaz gráfica
 - **JSON**: Almacenamiento de datos
-- **PIL/Pillow**: Manejo de imágenes (para iconos)
+- **Math**: Matemáticas
 
 ## Funcionalidades Principales
 
