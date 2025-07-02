@@ -42,7 +42,7 @@ class MainWindow:
         self.root.geometry(f"{WINDOW_WIDTH}x{WINDOW_HEIGHT}+0+0")        
         self.root.resizable(False, False)
         self.root.configure(bg=BG_COLOR)
-        self.root.attributes("-fullscreen", 1.0)
+        #self.root.attributes("-fullscreen", 1.0)
         # Variables de estado
         self.current_view = None
         self.sidebar = None
