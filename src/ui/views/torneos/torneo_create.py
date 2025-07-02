@@ -97,12 +97,25 @@ class TorneoFormView:
         matches = []        
         data = []
         if self.mostrar_equipo:                    
+
+            juga = set()            
             data = [j for j in self.equipos if j["id"] in self.selected]
 
             prom = 0
             for equipo in data:
                 prom += len(equipo["jugadores"])
+                for jg in equipo["jugadores"]:
+                    juga.add(jg["id_jugador"])
             
+            if(len(juga) != prom):
+                AlertDialog(
+                    parent=self.parent.winfo_toplevel(),
+                    message="Un jugador está registrado en dos equipos.",
+                    success=False, on_close=self.__show_list
+                )      
+                return
+
+
             prom = prom / len(data)
 
             std_valid = prom * 0.334
@@ -559,70 +572,6 @@ class TorneoFormView:
                 "Realm Royale",
                 "Heroes of the Storm",
                 "Heroes of Newerth",
-                "Command & Conquer Remastered",
-                "Stronghold Kingdoms",
-                "Total War: Arena",
-                "Shadowverse",
-                "Battlerite",
-                "Bloodline Champions",
-                "Battlegrounds",
-                "Auto Chess",
-                "Teamfight Tactics",
-                "Duelyst",
-                "Runeterra Legends",
-                "Lineage II PvP",
-                "Black Desert Online PvP",
-                "Lost Ark PvP",
-                "Albion Online",
-                "Crowfall",
-                "The Cycle: Frontier",
-                "Super Animal Royale",
-                "Totally Accurate Battlegrounds",
-                "Z1 Battle Royale",
-                "Ring of Elysium",
-                "Rumbleverse",
-                "Stumble Guys",
-                "PlanetSide Arena",
-                "PlanetSide 2",
-                "Enlisted",
-                "Heroes & Generals",
-                "World War 3",
-                "Hell Let Loose",
-                "Foxhole",
-                "Project Reality",
-                "Warface Breakout",
-                "CrimeCraft",
-                "APB Reloaded",
-                "Defiance",
-                "Firefall",
-                "GunZ: The Duel",
-                "S4 League",
-                "Combat Arms",
-                "WarRock",
-                "Crossout",
-                "Robocraft",
-                "Trove Battle Arena",
-                "Spore Galactic Adventures PvP",
-                "M.A.G.",
-                "Paragon",
-                "Gigantic",
-                "Bleeding Edge",
-                "Crucible",
-                "Hawken",
-                "MechWarrior Online",
-                "Titanfall 2",
-                "Dirty Bomb",
-                "Loadout",
-                "Blacklight: Retribution",
-                "Monday Night Combat",
-                "Section 8",
-                "Tribes: Ascend",
-                "Battleborn",
-                "Evolve",
-                "Hyper Universe",
-                "LawBreakers",
-                "Unreal Tournament",
-                "Renegade X",
             ],
             textvariable=self.juego_selec,
             placeholder=self.juego_selec.get() if self.torneo else "Videojuego",
