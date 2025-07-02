@@ -202,7 +202,7 @@ class TorneoView:
             b = torneo["fin"]
             f_1 = datetime.strptime(a, "%d/%m/%Y")
             f_2 = datetime.strptime(b, "%d/%m/%Y")
-            if(f_1 >= cmp and len(torneo["rondas"][-1][0]) == 3 and (torneo["rondas"][-1][0][2] == None)):
+            if(f_1 <= cmp and f_2 >= cmp and not(len(torneo["rondas"][-1][0]) == 3 and torneo["rondas"][-1][0][2] != None)):
                 inia += 1
 
             elif(len(torneo["rondas"][-1][0]) == 3 and torneo["rondas"][-1][0][2] != None):

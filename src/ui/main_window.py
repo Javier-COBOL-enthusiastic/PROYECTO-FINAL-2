@@ -14,7 +14,7 @@ from ui.views.jugadores import JugadoresView, JugadorFormView, JugadorFormViewNo
 import sys
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "mocks"))
-from ui.mocks import get_jugadores, create_jugador, update_jugador, delete_jugador, get_equipos, get_torneos, update_torneo, delete_torneo
+from ui.mocks import get_jugadores, create_jugador, update_jugador, delete_jugador, get_equipos, get_torneos, update_torneo, delete_torneo, delete_equipo, update_equipo
 
 # Constantes de configuración de la ventana
 WINDOW_WIDTH = 1200
@@ -39,10 +39,10 @@ class MainWindow:
         # Crear la ventana principal
         self.root = Tk()
         self.root.title("KeyPlayer Manager")
-        self.root.geometry(f"{WINDOW_WIDTH}x{WINDOW_HEIGHT}+0+0")
+        self.root.geometry(f"{WINDOW_WIDTH}x{WINDOW_HEIGHT}+0+0")        
         self.root.resizable(False, False)
         self.root.configure(bg=BG_COLOR)
-        
+        self.root.attributes("-fullscreen", 1.0)
         # Variables de estado
         self.current_view = None
         self.sidebar = None
@@ -191,10 +191,26 @@ class MainWindow:
             EquipoView(main_frame)        
         elif view_name == "jugadores":
             jugadores = get_jugadores()            
-            # Función para manejar la eliminación de jugadores
+            # Función para manejar la eliminación de jugadores (de equipos tambien)
             def on_eliminar_jugador(jugador_id):
                 def do_delete():
                     delete_jugador(jugador_id)
+                    equipos = get_equipos()                    
+                    nuevo_lider = False
+                    for equipo in equipos:
+                        for jg in equipo["jugadores"]:
+                            if(jg["id_jugador"] == jugador_id):
+                                nuevo_lider = jg["es_lider"]
+                                equipo["jugadores"].remove(jg)
+                                update_equipo(equipo["id"], equipo["nombre"], equipo["jugadores"])
+                        if(len(equipo["jugadores"]) == 0):
+                            delete_equipo(equipo["id"])
+                            continue
+                        if(nuevo_lider):
+                            equipo["jugadores"][0]["es_lider"] = True
+                            update_equipo(equipo["id"], equipo["nombre"], equipo["jugadores"])
+                        
+                                                                                              
                     self.show_view("jugadores")  # Recargar la vista
 
                 ConfirmDialog(

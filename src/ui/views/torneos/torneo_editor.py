@@ -1,5 +1,6 @@
 from tkinter import *
-from ui.elements import RoundedButton, StyledEntry, StyledCombobox, AlertDialog
+from ui.elements import RoundedButton
+from ui.mocks import update_jugador, get_jugadores
 
 
 class TorneoEdit:
@@ -24,26 +25,68 @@ class TorneoEdit:
 
     def set_ganador(self, participante):                
         siguiente = max(0, self.partida - 1)
-        if(self.ronda < len(self.torneo["rondas"]) - 1):
-            
+        if(self.ronda < len(self.torneo["rondas"]) - 1):            
             if(len(self.torneo["rondas"][self.ronda + 1][siguiente]) < 2):
                 self.torneo["rondas"][self.ronda + 1][siguiente].append(participante)
-            else:
-                return
-            
+
             if(len(self.torneo["rondas"][self.ronda + 1][siguiente]) == 2):
                 self.torneo["rondas"][self.ronda + 1][siguiente].append(None)            
+
         if(self.torneo["rondas"][self.ronda][self.partida][2] is None):                                                
             self.torneo["rondas"][self.ronda][self.partida][2] = participante["id"]
-
+                                                                  
         self.update()
 
-    
+
+    def guardar(self):
+        for ronda in self.torneo["rondas"]:
+            for partida in ronda:
+                if(len(partida) < 3):
+                    continue
+                if(partida[2] == None):
+                    continue
+
+                perdedor = partida[0] if partida[0]["id"] != partida[2] else partida[1]
+                ganador = partida[0] if partida[0]["id"] == partida[2] else partida[1]
+                
+                if(partida[0].get("jugadores") == None):                
+                    diff = abs(ganador["puntos"] - perdedor["puntos"]) // 4
+                    if(diff == 0):
+                        diff = 5
+                    if(diff > 100):
+                        diff = 100
+                    ganador["puntos"] += diff
+                    perdedor["puntos"] -= diff // 4
+                    perdedor["puntos"] = 0 if perdedor["puntos"] < 0 else perdedor["puntos"]
+                    for n in [ganador, perdedor]:
+                        update_jugador(n["id"], n["nombre"], n["puntos"])
+                else:
+                    jugadores = get_jugadores()
+                    def equipo_puntos(equipo): #no se quito jaja
+                        suma = 0
+                        for id in equipo["jugadores"]:
+                            for jugador in jugadores:
+                                if(jugador["id"] == id["id_jugador"]):
+                                    suma += jugador["puntos"]                                
+                        return suma
+                    g = equipo_puntos(ganador)
+                    p = equipo_puntos(perdedor)
+                    diff = abs(g - p) // 4
+                    g_id = [j["id_jugador"] for j in ganador["jugadores"]]
+                    p_id = [j["id_jugador"] for j in perdedor["jugadores"]]                    
+                    for n in jugadores:
+                        if(n["id"] in g_id):
+                            update_jugador(n["id"], n["nombre"], n["puntos"] + diff)
+                        elif(n["id"] in p_id):
+                            n["puntos"] = n["puntos"] - diff if (n["puntos"] - diff // 4) >= 0 else 0
+                            update_jugador(n["id"], n["nombre"], n["puntos"])              
+            self.on_save(self.torneo)
+
     def __init__(self, parent, torneo, on_save):
         self.parent = parent
         self.torneo = torneo
         self.ronda = 0
-        self.partida = 0
+        self.partida = 0        
         self.on_save = on_save
 
 
@@ -148,7 +191,7 @@ class TorneoEdit:
                 
         
         self.data_frame_container = Frame(card, bg="white")
-        self.data_frame_container.pack(fill="both", padx=20, pady=(0, 24), expand=True)        
+        self.data_frame_container.pack(fill="both", padx=20, pady=(0, 12), expand=True)        
         
         self.update()
 
@@ -245,10 +288,10 @@ class TorneoEdit:
             height=250,
             radius=18,
             font=("Consolas", 13, "bold"),
-            bg="#efb810" if (partidos[2] is not None) and (partidos[2] == partidos[0]["id"]) else "#888aaa" if (partidos[2] is None) else "#888",
+            bg="#efb810" if (len(partidos) == 3 and partidos[2] is not None) and (partidos[2] == partidos[0]["id"]) else "#888aaa" if (len(partidos) == 3 and partidos[2] is None) else "#888",
             fg="white",
             hover_bg="#efb810",
-            command=lambda : self.set_ganador(partidos[0]) if len(self.torneo["rondas"][self.ronda][self.partida]) > 0 else None
+            command=lambda : self.set_ganador(partidos[0]) if len(self.torneo["rondas"][self.ronda][self.partida]) > 2 else None
         ).pack(side="left")
         Label(
             nombres_frame,
@@ -257,7 +300,7 @@ class TorneoEdit:
             bg="white",
             fg="#1A1832",            
             anchor="w",
-        ).pack(side="left", padx=50, pady=(30, 6))
+        ).pack(side="left", padx=125, pady=(30, 6))
         RoundedButton(
             nombres_frame,
             text=nombre2,
@@ -265,10 +308,10 @@ class TorneoEdit:
             height=250,
             radius=18,
             font=("Consolas", 13, "bold"),
-            bg="#efb810" if (partidos[2] is not None) and (partidos[2] == partidos[1]["id"]) else "#888aaa" if (partidos[2] is None) else "#888",
+            bg="#efb810" if (len(partidos) == 3 and partidos[2] is not None) and (partidos[2] == partidos[1]["id"]) else "#888aaa" if (len(partidos) == 3 and partidos[2] is None) else "#888",
             hover_bg="#efb810",
             fg="white",
-            command=lambda : self.set_ganador(partidos[1]) if len(self.torneo["rondas"][self.ronda][self.partida]) > 0 else None      
+            command=lambda : self.set_ganador(partidos[1]) if len(self.torneo["rondas"][self.ronda][self.partida]) > 2 else None      
         ).pack(side="left")
 
         RoundedButton(
@@ -278,7 +321,7 @@ class TorneoEdit:
             height=44,
             radius=18,
             font=("Consolas", 13, "bold"),
-            command=lambda : self.on_save(self.torneo)            
+            command=self.guardar
         ).pack()
         
         # Label(

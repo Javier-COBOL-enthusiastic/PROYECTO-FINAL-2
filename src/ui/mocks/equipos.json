@@ -1,40 +1,78 @@
 [
     {
-        "id": 1,
-        "nombre": "Equipo test",
+        "id": 2,
+        "nombre": "Chilemorrones",
         "jugadores": [
             {
-                "id_jugador": 1,
+                "id_jugador": 28,
+                "es_lider": true
+            },
+            {
+                "id_jugador": 29,
+                "es_lider": false
+            }
+        ]
+    },
+    {
+        "id": 4,
+        "nombre": "TEAM 2",
+        "jugadores": [
+            {
+                "id_jugador": 30,
+                "es_lider": true
+            },
+            {
+                "id_jugador": 31,
+                "es_lider": false
+            }
+        ]
+    },
+    {
+        "id": 5,
+        "nombre": "TEAM 1",
+        "jugadores": [
+            {
+                "id_jugador": 32,
+                "es_lider": true
+            },
+            {
+                "id_jugador": 33,
+                "es_lider": false
+            }
+        ]
+    },
+    {
+        "id": 6,
+        "nombre": "Equipo Bala",
+        "jugadores": [
+            {
+                "id_jugador": 26,
                 "es_lider": false
             },
             {
                 "id_jugador": 27,
-                "es_lider": false
+                "es_lider": true
+            }
+        ]
+    },
+    {
+        "id": 7,
+        "nombre": "BUG",
+        "jugadores": [
+            {
+                "id_jugador": 32,
+                "es_lider": true
             },
             {
                 "id_jugador": 33,
                 "es_lider": false
             },
             {
-                "id_jugador": 23,
-                "es_lider": true
-            }
-        ]
-    },
-    {
-        "id": 2,
-        "nombre": "Chilemorrones",
-        "jugadores": [
-            {
-                "id_jugador": 1,
-                "es_lider": true
-            },
-            {
-                "id_jugador": 23,
+                "id_jugador": 26,
                 "es_lider": false
             },
             {
-                "id_jugador": 26,
+                "id_jugador": 27,
                 "es_lider": false
             },
             {
@@ -42,50 +80,16 @@
                 "es_lider": false
             },
             {
-                "id_jugador": 31,
-                "es_lider": false
-            }
-        ]
-    },
-    {
-        "id": 4,
-        "nombre": "asd",
-        "jugadores": [
-            {
-                "id_jugador": 32,
-                "es_lider": false
-            },
-            {
-                "id_jugador": 31,
-                "es_lider": true
-            }
-        ]
-    },
-    {
-        "id": 5,
-        "nombre": "dddd",
-        "jugadores": [
-            {
-                "id_jugador": 1,
-                "es_lider": false
-            },
-            {
-                "id_jugador": 27,
-                "es_lider": true
-            }
-        ]
-    },
-    {
-        "id": 6,
-        "nombre": "12345678901234567890123456789",
-        "jugadores": [
-            {
-                "id_jugador": 26,
+                "id_jugador": 29,
                 "es_lider": false
             },
             {
                 "id_jugador": 30,
-                "es_lider": true
+                "es_lider": false
+            },
+            {
+                "id_jugador": 31,
+                "es_lider": false
             }
         ]
     }

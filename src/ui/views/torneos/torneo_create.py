@@ -4,6 +4,7 @@ from ui.views.equipo.equipo_form import EquipoFormView
 from ui.views.jugadores import JugadorFormView
 from ui.mocks import update_jugador, update_equipo, create_torneo, delete_torneo
 from datetime import datetime
+from math import sqrt
 
 
 
@@ -27,8 +28,7 @@ class TorneoFormView:
         self.clean_data = [x for i, x in self.torneo.items()]
         
         #print(self.clean_data)     
-        
-        #toca agregar algo pa ver si el nombre no es repetido?? @20220270
+                
         if(len(self.clean_data[0]) == 0 or self.clean_data[0] == "Nombre del torneo..."):
             AlertDialog(
                 self.parent.winfo_toplevel(), "El nombre del torneo no puede estar vacío.", success=False, on_close=self.__show_list
@@ -94,11 +94,34 @@ class TorneoFormView:
             return
         
         #Parte de crear el torneo y matchmaking
-        matches = []
-        any_unbalanced = False
+        matches = []        
         data = []
         if self.mostrar_equipo:                    
             data = [j for j in self.equipos if j["id"] in self.selected]
+
+            prom = 0
+            for equipo in data:
+                prom += len(equipo["jugadores"])
+            
+            prom = prom / len(data)
+
+            std_valid = prom * 0.334
+
+            suma = 0
+            for equipo in data:
+                suma += (len(equipo["jugadores"]) - prom) ** 2
+            
+            suma = suma / (len(data) - 1)
+
+            std = sqrt(suma)
+
+            if(int(std) > int(std_valid)):
+                AlertDialog(
+                    parent=self.parent.winfo_toplevel(),
+                    message="La cantidad de jugadores entre los equipos es muy desigual.",
+                    success=False, on_close=self.__show_list
+                )      
+                return
 
             def add_puntos(equipo): #quitar despues?
                 suma = 0
@@ -116,16 +139,11 @@ class TorneoFormView:
             data = sorted(data, key=lambda a : a["puntos"])
 
 
-        for i in range(0, len(data) - 1, 2):
-            if not self.mostrar_equipo:
-                diff = data[i]["puntos"] < data[i + 1]["puntos"] - 20
-            else:
-                diff = data[i][1] < data[i + 1][1] - 30
-            any_unbalanced = diff or any_unbalanced
+        for i in range(0, len(data) - 1, 2):                    
             if self.mostrar_equipo:
-                matches.append((data[i][0], data[i + 1][0], None, diff))
+                matches.append([data[i][0], data[i + 1][0], None])
             else:
-                matches.append((data[i], data[i + 1], None, diff))
+                matches.append([data[i], data[i + 1], None])
         
         #El None sera el id del ganador
 

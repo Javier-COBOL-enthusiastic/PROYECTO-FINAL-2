@@ -2,36 +2,41 @@
     {
         "id": 26,
         "nombre": "Emely",
-        "puntos": 20
+        "puntos": 0
     },
     {
         "id": 27,
         "nombre": "Emilico",
-        "puntos": 25
+        "puntos": 0
     },
     {
         "id": 28,
         "nombre": "Mao mao",
-        "puntos": 30
+        "puntos": 0
     },
     {
         "id": 29,
         "nombre": "Loulan",
-        "puntos": 35
+        "puntos": 0
     },
     {
         "id": 30,
         "nombre": "Monica",
-        "puntos": 40
+        "puntos": 0
     },
     {
         "id": 31,
         "nombre": "Albedo",
-        "puntos": 45
+        "puntos": 0
     },
     {
         "id": 32,
         "nombre": "Yair17",
-        "puntos": 50
-    }    
+        "puntos": 0
+    },
+    {
+        "id": 33,
+        "nombre": "Enrique",
+        "puntos": 0
+    }
 ]
